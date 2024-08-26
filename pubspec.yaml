@@ -1,0 +1,49 @@
+name: gecimmoa
+description: A new Flutter project.
+version: 1.0.0+1
+environment: 
+  sdk: '>=2.12.0 <3.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  fl_chart: ^0.40.0
+  shared_preferences: ^2.0.13
+  percent_indicator: ^4.0.0
+  cupertino_icons: ^1.0.2
+  provider: ^6.0.3
+  font_awesome_flutter: ^10.1.0 
+  flutter_localizations:
+    sdk: flutter
+  cached_network_image: ^3.3.0
+  flutter_svg: ^2.0.9
+  flutter_svg_provider: ^1.0.7
+  connectivity_plus: ^5.0.2
+  flutter_slidable: ^3.1.0
+  table_calendar: ^3.0.9
+dev_dependencies: 
+  flutter_test: 
+    sdk: flutter
+flutter: 
+  uses-material-design: true
+  assets: 
+    - assets/
+    - assets/images/
+    - assets/images/img_arrow_right.svg
+
+  fonts: 
+    - family: Barlow Semi Condensed
+      fonts: 
+        - asset: assets/fonts/BarlowSemiCondensedBold.ttf
+          weight: 700
+        - asset: assets/fonts/BarlowSemiCondensedLight.ttf
+          weight: 300
+        - asset: assets/fonts/BarlowSemiCondensedMedium.ttf
+          weight: 500
+        - asset: assets/fonts/BarlowSemiCondensedSemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BarlowSemiCondensedRegular.ttf
+          weight: 400
+    - family: Inter
+      fonts: 
+        - asset: assets/fonts/InterBold.ttf
+          weight: 700
