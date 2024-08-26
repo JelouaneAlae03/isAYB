@@ -15,7 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       this.title,
       this.centerTitle,
       this.actions, 
-      bottom, child
+      bottom, child, toolbarHeight,
       })
       : super(
           key: key,

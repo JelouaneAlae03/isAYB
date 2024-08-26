@@ -227,6 +227,37 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+
+class ApiServices {
+  final Dio _dio = Dio();
+
+  ApiServices(String s);
+
+  Future<bool> validateWorkflow(String token, String codeDemande, String observation, bool isAprouver) async {
+    try {
+      final response = await _dio.post(
+        'http://localhost:3000/api/ValideDemandeWorkFlow',
+        data: {
+          'token': token,
+          'CodeDemande': codeDemande,
+          'Observation': observation,
+          'IsAprouver': isAprouver
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('Error: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return false;
+    }
+  }
+}
 
 class ApiService {
   static const String baseUrl = 'http://localhost:3000/api';

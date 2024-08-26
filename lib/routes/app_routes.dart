@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gecimmoa/presentation/appel_doffre_screen/widgets/create_demande_screen.dart';
 import 'package:gecimmoa/presentation/log_in_screen/log_in_screen.dart';
 import 'package:gecimmoa/presentation/menu_screen/menu_screen.dart';
-import '../core/app_export.dart';
 import '../presentation/app_navigation_screen/app_navigation_screen.dart';
 import '../presentation/appel_doffre_screen/appel_doffre_screen.dart';
 import '../presentation/get_started_screen/get_started_screen.dart';
@@ -30,6 +29,7 @@ class AppRoutes {
   static const String initialRoute = '/initialRoute';
   static const String taskManagementScreen = '/suivi_terrain_screen';
   static const String createDemandeScreen = '/create_demande_screen';
+
 
   static Map<String, WidgetBuilder> routes = {
     homeContainerScreen: (context) => HomeContainerScreen(),
