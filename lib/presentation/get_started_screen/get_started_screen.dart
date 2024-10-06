@@ -51,7 +51,7 @@ class GetStartedScreen extends StatelessWidget {
                   children: [
                     SizedBox(height: 34.v),
                     SizedBox(
-                      width: 200.h,
+                      width: 250.h,
                       child: Text(
                         "Logiciel de gestion \ndes achats".toUpperCase(),
                         maxLines: 3,
@@ -61,7 +61,7 @@ class GetStartedScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 10.v),
                     Container(
-                      width: 294.h,
+                      width: 350.h,
                       margin: EdgeInsets.only(left: 4.h),
                       child: Text(
                         "frais généraux, prestations diverses et matières premières adaptée à vos besoins"

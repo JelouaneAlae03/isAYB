@@ -229,41 +229,111 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 
-class ApiServices {
-  final Dio _dio = Dio();
+// class ApiServices {
+//   final Dio _dio = Dio();
 
-  ApiServices(String s);
+//   ApiServices(String s);
 
-  Future<bool> validateWorkflow(String token, String codeDemande, String observation, bool isAprouver) async {
-    try {
-      final response = await _dio.post(
-        'http://localhost:3000/api/ValideDemandeWorkFlow',
-        data: {
-          'token': token,
-          'CodeDemande': codeDemande,
-          'Observation': observation,
-          'IsAprouver': isAprouver
-        },
-      );
+//   Future<bool> validateWorkflow(String token, String codeDemande, String observation, bool isAprouver) async {
+//     try {
+//       final response = await _dio.post(
+//         'http://localhost:3000/api/ValideDemandeWorkFlow',
+//         data: {
+//           'token': token,
+//           'CodeDemande': codeDemande,
+//           'Observation': observation,
+//           'IsAprouver': isAprouver
+//         },
+//       );
 
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Error: ${response.data}');
-        return false;
-      }
-    } catch (e) {
-      print('Exception: $e');
-      return false;
-    }
+//       if (response.statusCode == 200) {
+//         return true;
+//       } else {
+//         print('Error: ${response.data}');
+//         return false;
+//       }
+//     } catch (e) {
+//       print('Exception: $e');
+//       return false;
+//     }
+//   }
+// }
+class Workflows {
+  final String codeDemande;
+  final double amount;
+  final String validator;
+  final DateTime date;
+  final bool? isAccepted;
+
+  Workflows({
+    required this.codeDemande,
+    required this.amount,
+    required this.validator,
+    required this.date,
+    this.isAccepted,
+  });
+
+  factory Workflows.fromJson(Map<String, dynamic> json) {
+    return Workflows(
+      codeDemande: json['codeDemande'],
+      amount: json['amount'] != null ? json['amount'].toDouble() : 0.0, // Handle null amount
+      validator: json['validator'],
+      date: DateTime.parse(json['date']),
+      isAccepted: json['isAccepted'],
+    );
   }
 }
+//  class Workflows {
+//     final String codeDemande;
+//     final double amount;
+//     final String validator;
+//     final DateTime date;
+//     final bool? isAccepted;
 
+//     Workflows({required this.codeDemande, required this.amount, required this.validator, required this.date, this.isAccepted});
+
+//     factory Workflows.fromJson(Map<String, dynamic> json) {
+//       return Workflows(
+//         codeDemande: json['codeDemande'],
+//         amount: json['amount'].toDouble(),
+//         validator: json['validator'],
+//         date: DateTime.parse(json['date']),
+//         isAccepted: json['isAccepted'],
+//       );
+//     }
+//   } 
 class ApiService {
   static const String baseUrl = 'http://localhost:3000/api';
   static const Duration timeoutDuration = Duration(seconds: 30);
 
   ApiService(String s); // 30 seconds
+  static Future<List<Workflows>> fetchWorkflows() async {
+      final response = await http.get(Uri.parse('http://localhost:3000/getWorkflows'));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        return data.map((workflows) => Workflows.fromJson(workflows)).toList();
+      } else {
+        throw Exception('Failed to load workflows');
+      }
+    }
+
+    static Future<void> validateWorkflow(String codeDemande, bool isAccepted) async {
+      final response = await http.post(
+        Uri.parse('$baseUrl/ValideDemandeWorkFlow'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'codeDemande': codeDemande,
+          'isAccepted': isAccepted,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to validate workflow');
+      }
+    }
+  
+  
 
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
@@ -596,22 +666,22 @@ class ApiService {
     }
   }
 
-  Future<bool> validateWorkflow(String token, String codeDemande, String observation, bool isAprouver) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/ValideDemandeWorkFlow'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'token': token,
-        'CodeDemande': codeDemande,
-        'Observation': observation,
-        'IsAprouver': isAprouver,
-      }),
-    );
+  // Future<bool> validateWorkflow(String token, String codeDemande, String observation, bool isAprouver) async {
+  //   final response = await http.post(
+  //     Uri.parse('$baseUrl/ValideDemandeWorkFlow'),
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: jsonEncode({
+  //       'token': token,
+  //       'CodeDemande': codeDemande,
+  //       'Observation': observation,
+  //       'IsAprouver': isAprouver,
+  //     }),
+  //   );
 
-    return response.statusCode == 200;
-  }
+  //   return response.statusCode == 200;
+  // }
 
 
   static Future<Map<String, dynamic>> getOrderDetails(

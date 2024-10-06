@@ -865,6 +865,110 @@ console.log(token);
 //       }]
 //   }]
 // }));
+const workflowsSchema = new mongoose.Schema({
+  codeDemande: String,
+  amount: Number,
+  validator: String,
+  date: Date,
+  isAccepted: Boolean,
+});
+
+const Workflows = mongoose.model('Workflows', workflowsSchema);
+
+// Add a new workflow
+app.post('/addWorkflow', async (req, res) => {
+  try {
+    const { codeDemande, amount, validator, date } = req.body;
+
+    if (!codeDemande || !amount || !validator || !date) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const newWorkflows = new Workflows({
+      codeDemande,
+      amount,
+      validator,
+      date: new Date(date),
+      isAccepted: null, // Initially null, not accepted or rejected
+    });
+
+    await newWorkflows.save();
+
+    res.status(201).json({ message: 'Workflow added successfully', workflows: newWorkflows });
+  } catch (error) {
+    console.error('Error adding workflow:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get all workflows
+app.get('/getWorkflows', async (req, res) => {
+  try {
+    const workflows = await Workflows.find();
+    res.status(200).json(workflows);
+  } catch (error) {
+    console.error('Error fetching workflows:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+app.post('/ValideDemandeWorkFlow', async (req, res) => {
+  try {
+    // Extracting codeDemande and isAccepted from the request body
+    const { codeDemande, isAccepted } = req.body;
+
+    // Logging the received data for debugging purposes
+    console.log('Received codeDemande:', codeDemande);
+    console.log('Received isAccepted:', isAccepted);
+
+    // Check if codeDemande or isAccepted is missing or invalid
+    if (!codeDemande || typeof isAccepted !== 'boolean') {
+      return res.status(400).json({ message: 'Invalid data provided' });
+    }
+
+    // Find the workflow document with the matching codeDemande
+    const workflow = await Workflows.findOne({ codeDemande });
+
+    // If the workflow is not found, return a 404 error
+    if (!workflow) {
+      return res.status(404).json({ message: 'Workflow not found' });
+    }
+
+    // Update the workflow's isAccepted field and save it
+    workflow.isAccepted = isAccepted;
+    await workflow.save();
+
+    // Respond with success message
+    res.status(200).json({ message: 'Workflow updated successfully' });
+
+  } catch (error) {
+    // Log any errors that occur during the process
+    console.error('Error validating workflow:', error);
+
+    // Respond with a 500 status and an error message
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Validate a workflow
+// app.post('/ValideDemandeWorkFlow', async (req, res) => {
+//   try {
+//     const { codeDemande, isAccepted } = req.body;
+
+//     const workflows = await Workflows.findOne({ codeDemande });
+
+//     if (!workflows) {
+//       return res.status(404).json({ message: 'Workflow not found' });
+//     }
+
+//     workflows.isAccepted = isAccepted;
+//     await workflows.save();
+
+//     res.status(200).json({ message: 'Workflow updated successfully' });
+//   } catch (error) {
+//     console.error('Error validating workflow:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
 const DemandeAchat = require('./models/DemandeAchat');
 
 
@@ -972,7 +1076,17 @@ const WorkflowSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Workflow', WorkflowSchema);
-
+app.get('/proxy-login', async (req, res) => {
+  try {
+    const response = await axios.get('https://achat.test.gc-badr.xyz/Api/Login', {
+      params: { username: req.query.username, password: req.query.password },
+    });
+    res.json(response.data);
+    console.log(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Proxy request failed' });
+  }
+});
 // const chantierSchema = new mongoose.Schema({
 //   libelle: String,
 //   description: String,
@@ -1012,6 +1126,99 @@ module.exports = mongoose.model('Workflow', WorkflowSchema);
 //     res.status(500).json({ error: 'Failed to fetch chantiers' });
 //   }
 // });
+
+const suiviChantierSchema = new mongoose.Schema({
+    libelle: { type: String, required: true },
+    suiviGrosOeuvre: { type: Boolean, required: true },
+    date: { type: Date, required: true },
+    bloc: { type: String, required: true },
+});
+
+const SuiviChantier = mongoose.model('SuiviChantier', suiviChantierSchema);
+
+module.exports = SuiviChantier;
+// app.post('/suivi-chantier', (req, res) => {
+//   const { libelle, suiviGrosOeuvre, date, bloc } = req.body;
+
+//   // Here you would typically save the data to a database
+//   // For example, using Mongoose with MongoDB:
+  
+//   const suiviChantier = new SuiviChantier({
+//       libelle: libelle,
+//       suiviGrosOeuvre: suiviGrosOeuvre,
+//       date: date,
+//       bloc: bloc
+//   });
+
+//   suiviChantier.save()
+//       .then(result => res.status(201).send(result))
+//       .catch(err => res.status(500).send(err));
+  
+
+//   // For now, just return the received data as a JSON response
+//   res.status(200).json({
+//       message: "Suivi de chantier created successfully!",
+//       data: {
+//           libelle,
+//           suiviGrosOeuvre,
+//           date,
+//           bloc
+//       }
+//   });
+// });
+app.post('/suivi-chantier', async (req, res) => {
+  try {
+      const { libelle, suiviGrosOeuvre, date, bloc } = req.body;
+
+      // Create the new suivi de chantier
+      const newSuivi = new SuiviChantier({
+          libelle,
+          suiviGrosOeuvre,
+          date,
+          bloc
+      });
+
+      // Save it to the database
+      await newSuivi.save();
+
+      // Send a successful response
+      res.status(201).json({
+          message: "Suivi de chantier created successfully!",
+          data: newSuivi
+      });
+
+      // Make sure to return after sending the response
+      return;
+      
+  } catch (err) {
+      console.error(err);
+      
+      // Send an error response
+      res.status(500).json({
+          message: "An error occurred while creating suivi de chantier.",
+          error: err.message
+      });
+
+      // Make sure to return after sending the response
+      return;
+  }
+});
+app.get('/api/suivis', async (req, res) => {
+  const suivis = await SuiviChantier.find();
+  res.json(suivis);
+});
+
+app.post('/api/suivis', async (req, res) => {
+  const newSuiviChantier = new SuiviChantier(req.body);
+  await newSuiviChantier.save();
+  res.status(201).json(newSuiviChantier);
+});
+
+app.delete('/api/suivis/:id', async (req, res) => {
+  await SuiviChantier.findByIdAndDelete(req.params.id);
+  res.status(204).send();
+});
+
 const chantierSchema = new mongoose.Schema({
   libelle: { type: String, required: true,unique:true },
   description: { type: String, required: true },

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/app_export.dart';
 
-enum BottomBarEnum { Home, Call, Clock, Menu, appel, validate }
+// enum BottomBarEnum { Home, Call, Clock, Menu, appel, validate }
+enum BottomBarEnum { Call, Clock }
 // ignore_for_file: must_be_immutable
 
 // ignore_for_file: must_be_immutable
@@ -20,11 +21,11 @@ class CustomBottomBarState extends State<CustomBottomBar> {
   int selectedIndex = 0;
 
   List<BottomMenuModel> bottomMenuList = [
-    BottomMenuModel(
-      icon: ImageConstant.imgHome,
-      activeIcon: ImageConstant.imgHome,
-      type: BottomBarEnum.Home,
-    ),
+    // BottomMenuModel(
+    //   icon: ImageConstant.imgHome,
+    //   activeIcon: ImageConstant.imgHome,
+    //   // type: BottomBarEnum.Home,
+    // ),
     BottomMenuModel(
       icon: ImageConstant.imgCall,
       activeIcon: ImageConstant.imgCall,

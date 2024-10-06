@@ -6525,427 +6525,269 @@
 //     Navigator.pushNamed(context, AppRoutes.menuScreen);
 //   }
 // }
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:gecimmoa/core/app_export.dart';
-import 'package:http/http.dart' as http;
-import 'package:gecimmoa/widgets/app_bar/custom_app_bar.dart';
-import 'package:gecimmoa/presentation/suivi_terrain_screen/widgets/AddChantierForm.dart';
-import 'package:table_calendar/table_calendar.dart';
+// import 'dart:convert';
+// import 'package:flutter/material.dart';
+// import 'package:gecimmoa/core/app_export.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:gecimmoa/widgets/app_bar/custom_app_bar.dart';
+// import 'package:gecimmoa/presentation/suivi_terrain_screen/widgets/AddChantierForm.dart';
+// import 'package:table_calendar/table_calendar.dart';
 
-class TaskManagementScreen extends StatefulWidget {
-  @override
-  _TaskManagementScreenState createState() => _TaskManagementScreenState();
-}
+// class TaskManagementScreen extends StatefulWidget {
+//   @override
+//   _TaskManagementScreenState createState() => _TaskManagementScreenState();
+// }
 
-class _TaskManagementScreenState extends State<TaskManagementScreen> {
-  List<Map<String, dynamic>> tasks = [];
-  bool isLoading = true;
-  String? errorMessage;
+// class _TaskManagementScreenState extends State<TaskManagementScreen> {
+//   List<Map<String, dynamic>> tasks = [];
+//   bool isLoading = true;
+//   String? errorMessage;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchTasks();
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _fetchTasks();
+//   }
 
-  final Map<DateTime, List<String>> _agenda = {};
+//   final Map<DateTime, List<String>> _agenda = {};
 
-  Future<void> _fetchTasks() async {
-    try {
-      final response = await http
-          .get(Uri.parse('http://localhost:3000/chantiers'));
+//   Future<void> _fetchTasks() async {
+//     try {
+//       final response = await http
+//           .get(Uri.parse('http://localhost:3000/chantiers'));
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          tasks = data.map<Map<String, dynamic>>((task) {
-            return {
-              '_id': task['_id'],
-              'libelle': task['libelle'],
-              'description': task['description'],
-              'dateDebut': task['dateDebut'],
-              'dateFinPrev': task['dateFinPrev'],
-              'chefChantier': task['chefChantier'],
-            };
-          }).toList();
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load tasks');
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        errorMessage = 'Error fetching tasks: $e';
-      });
-    }
-  }
-  //  Future<void> _confirmDeleteTask(BuildContext context, String id) async {
-  //   return showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: false, // User must tap a button to dismiss
-  //     builder: (BuildContext context) { 
-  //       return Theme(
-  //         data: Theme.of(context).copyWith(
-  //           dialogBackgroundColor: Colors.grey[900], // Background color
-  //           textTheme: TextTheme(
-  //             bodyText1: TextStyle(color: Colors.white), // Text color
-  //             bodyText2: TextStyle(color: Colors.white),
-  //             button: TextStyle(color: Colors.blue), // Button text color
-  //           ),
-  //         ),
-  //         child:AlertDialog(
-  //         title: Text('Confirmation'),
-  //         content: SingleChildScrollView(
-  //           child: ListBody(
-  //             children: <Widget>[
-  //               Text('Are you sure you want to delete this chantier?'),
-  //             ],
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: Text('Cancel'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // Close the dialog
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: Text('Delete'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // Close the dialog
-  //               _deleteTask(id); // Perform the deletion
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-  Future<void> _confirmDeleteTask(BuildContext context, String id) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            dialogBackgroundColor: appTheme.gray400, // Background color
-            textTheme: TextTheme(
-              bodyText1: TextStyle(color: Colors.white), // Text color
-              bodyText2: TextStyle(color: Colors.white),
-              button: TextStyle(color: Colors.blue), // Button text color
-            ),
-          ),
-          child: AlertDialog(
-            title: Text('Confirmation'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('Are you sure you want to delete this chantier?'),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: Text('Delete'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _deleteTask(id);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _deleteTask(String id) async {
-    try {
-      final response = await http.delete(Uri.parse('http://localhost:3000/chantiers/$id'));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          tasks.removeWhere((task) => task['_id'] == id);
-        });
-      } else {
-        throw Exception('Failed to delete task');
-      }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error deleting task: $e';
-      });
-    }
-  }
-
-  // void _showAttendanceAgenda(BuildContext context) {
-  // DateTime _selectedDay = DateTime.now();
-
-  // void _addTaskForDay(DateTime day, String task) {
-  //   setState(() {
-  //     if (_agenda[day] == null) {
-  //       _agenda[day] = [];
-  //     }
-  //     _agenda[day]!.add(task);
-  //   });
-  // }
-
-  // void _showAddTaskDialog(BuildContext ctx) {
-  //   final _taskController = TextEditingController();
-
-  //   showDialog(
-  //     context: ctx,
-  //     builder: (context) => AlertDialog(
-  //       title: Text('Ajouter une tâche'),
-  //       content: TextField(
-  //         controller: _taskController,
-  //         decoration: InputDecoration(hintText: 'Saisir la tâche'),
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           child: Text('Annuler'),
-  //           onPressed: () => Navigator.of(context).pop(),
-  //         ),
-  //         ElevatedButton(
-  //           child: Text('Ajouter'),
-  //           onPressed: () {
-  //             if (_taskController.text.isNotEmpty) {
-  //               _addTaskForDay(_selectedDay, _taskController.text);
-  //               Navigator.of(context).pop();
-  //             }
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // showDialog(
-  //   context: context,
-  //   builder: (ctx) => StatefulBuilder(
-  //     builder: (BuildContext context, StateSetter setState) {
-  //       return AlertDialog(
-  //         title: Text('Agenda des présences'),
-  //         content: SizedBox(
-  //           width: double.maxFinite, // Set a max width for the dialog content
-  //           child: SingleChildScrollView(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 TableCalendar(
-  //                   calendarStyle: CalendarStyle(
-  //                     todayDecoration: BoxDecoration(
-  //                       color: Colors.blueAccent,
-  //                       shape: BoxShape.circle,
-  //                     ),
-  //                   ),
-  //                   firstDay: DateTime.utc(2020, 1, 1),
-  //                   lastDay: DateTime.utc(2100, 12, 31),
-  //                   focusedDay: _selectedDay,
-  //                   selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-  //                   onDaySelected: (selectedDay, focusedDay) {
-  //                     setState(() {
-  //                       _selectedDay = selectedDay;
-  //                     });
-  //                   },
-  //                 ),
-  //                 SizedBox(height: 16.0),
-  //                 _agenda[_selectedDay]?.isNotEmpty == true
-  //                     ? Column(
-  //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                         children: _agenda[_selectedDay]!.map((task) {
-  //                           return ListTile(
-  //                             title: Text(task),
-  //                           );
-  //                         }).toList(),
-  //                       )
-  //                     : Text('Aucune tâche ajoutée pour ce jour.'),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             child: Text('Annuler'),
-  //             onPressed: () => Navigator.of(ctx).pop(),
-  //           ),
-  //           ElevatedButton(
-  //             child: Text('Ajouter tâche'),
-  //             onPressed: () => _showAddTaskDialog(ctx),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   ),
-  // );
-  // }
-
-//   void _showAttendanceAgenda(BuildContext context) {
-//   DateTime _selectedDay = DateTime.now();
-
-//   void _addTaskForDay(DateTime day, String task) {
-//     setState(() {
-//       if (_agenda[day] == null) {
-//         _agenda[day] = [];
+//       if (response.statusCode == 200) {
+//         final List<dynamic> data = json.decode(response.body);
+//         setState(() {
+//           tasks = data.map<Map<String, dynamic>>((task) {
+//             return {
+//               '_id': task['_id'],
+//               'libelle': task['libelle'],
+//               'description': task['description'],
+//               'dateDebut': task['dateDebut'],
+//               'dateFinPrev': task['dateFinPrev'],
+//               'chefChantier': task['chefChantier'],
+//             };
+//           }).toList();
+//           isLoading = false;
+//         });
+//       } else {
+//         throw Exception('Failed to load tasks');
 //       }
-//       _agenda[day]!.add(task);
-//     });
+//     } catch (e) {
+//       setState(() {
+//         isLoading = false;
+//         errorMessage = 'Error fetching tasks: $e';
+//       });
+//     }
 //   }
-
-//   void _showAddTaskDialog(BuildContext ctx) {
-//     final _taskController = TextEditingController();
-
-//     showDialog(
-//       context: ctx,
-//       builder: (context) => AlertDialog(
-//         title: Text(
-//           'Ajouter une tâche',
-//           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
-//         ),
-//         content: TextField(
-//           controller: _taskController,
-//           decoration: InputDecoration(
-//             hintText: 'Saisir la tâche',
-//             border: OutlineInputBorder(),
-//           ),
-//         ),
-//         actions: [
-//           TextButton(
-//             child: Text(
-//               'Annuler',
-//               style: TextStyle(color: Colors.redAccent),
+//   //  Future<void> _confirmDeleteTask(BuildContext context, String id) async {
+//   //   return showDialog<void>(
+//   //     context: context,
+//   //     barrierDismissible: false, // User must tap a button to dismiss
+//   //     builder: (BuildContext context) {
+//   //       return Theme(
+//   //         data: Theme.of(context).copyWith(
+//   //           dialogBackgroundColor: Colors.grey[900], // Background color
+//   //           textTheme: TextTheme(
+//   //             bodyText1: TextStyle(color: Colors.white), // Text color
+//   //             bodyText2: TextStyle(color: Colors.white),
+//   //             button: TextStyle(color: Colors.blue), // Button text color
+//   //           ),
+//   //         ),
+//   //         child:AlertDialog(
+//   //         title: Text('Confirmation'),
+//   //         content: SingleChildScrollView(
+//   //           child: ListBody(
+//   //             children: <Widget>[
+//   //               Text('Are you sure you want to delete this chantier?'),
+//   //             ],
+//   //           ),
+//   //         ),
+//   //         actions: <Widget>[
+//   //           TextButton(
+//   //             child: Text('Cancel'),
+//   //             onPressed: () {
+//   //               Navigator.of(context).pop(); // Close the dialog
+//   //             },
+//   //           ),
+//   //           TextButton(
+//   //             child: Text('Delete'),
+//   //             onPressed: () {
+//   //               Navigator.of(context).pop(); // Close the dialog
+//   //               _deleteTask(id); // Perform the deletion
+//   //             },
+//   //           ),
+//   //         ],
+//   //       );
+//   //     },
+//   //   );
+//   // }
+//   Future<void> _confirmDeleteTask(BuildContext context, String id) async {
+//     return showDialog<void>(
+//       context: context,
+//       barrierDismissible: false,
+//       builder: (BuildContext context) {
+//         return Theme(
+//           data: Theme.of(context).copyWith(
+//             dialogBackgroundColor: appTheme.gray400, // Background color
+//             textTheme: TextTheme(
+//               bodyText1: TextStyle(color: Colors.white), // Text color
+//               bodyText2: TextStyle(color: Colors.white),
+//               button: TextStyle(color: Colors.blue), // Button text color
 //             ),
-//             onPressed: () => Navigator.of(context).pop(),
 //           ),
-//           ElevatedButton(
-//             child: Text('Ajouter'),
-//             onPressed: () {
-//               if (_taskController.text.isNotEmpty) {
-//                 _addTaskForDay(_selectedDay, _taskController.text);
-//                 Navigator.of(context).pop();
-//               }
-//             },
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: Colors.green,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   showDialog(
-//     context: context,
-//     builder: (ctx) => StatefulBuilder(
-//       builder: (BuildContext context, StateSetter setState) {
-//         return AlertDialog(
-//           title: Text(
-//             'Agenda des présences',
-//             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
-//           ),
-//           content: SizedBox(
-//             width: double.maxFinite,
-//             child: SingleChildScrollView(
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   TableCalendar(
-//                     calendarStyle: CalendarStyle(
-//                       todayDecoration: BoxDecoration(
-//                         color: Colors.blueAccent,
-//                         shape: BoxShape.circle,
-//                       ),
-//                       selectedDecoration: BoxDecoration(
-//                         color: Colors.orangeAccent,
-//                         shape: BoxShape.circle,
-//                       ),
-//                       outsideDaysVisible: false,
-//                       weekendTextStyle: TextStyle(color: Colors.red),
-//                       defaultTextStyle: TextStyle(color: Colors.black),
-//                     ),
-//                     headerStyle: HeaderStyle(
-//                       formatButtonVisible: false,
-//                       titleCentered: true,
-//                       titleTextStyle: TextStyle(
-//                         fontSize: 18.0,
-//                         fontWeight: FontWeight.bold,
-//                         color: Colors.indigo,
-//                       ),
-//                       leftChevronIcon: Icon(Icons.chevron_left, color: Colors.indigo),
-//                       rightChevronIcon: Icon(Icons.chevron_right, color: Colors.indigo),
-//                     ),
-//                     firstDay: DateTime.utc(2020, 1, 1),
-//                     lastDay: DateTime.utc(2100, 12, 31),
-//                     focusedDay: _selectedDay,
-//                     selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-//                     onDaySelected: (selectedDay, focusedDay) {
-//                       setState(() {
-//                         _selectedDay = selectedDay;
-//                       });
-//                     },
-//                   ),
-//                   SizedBox(height: 16.0),
-//                   _agenda[_selectedDay]?.isNotEmpty == true
-//                       ? Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: _agenda[_selectedDay]!.map((task) {
-//                             return ListTile(
-//                               leading: Icon(Icons.check_circle, color: Colors.green),
-//                               title: Text(task),
-//                               trailing: Icon(Icons.delete, color: Colors.redAccent),
-//                               onTap: () {
-//                                 setState(() {
-//                                   _agenda[_selectedDay]!.remove(task);
-//                                 });
-//                               },
-//                             );
-//                           }).toList(),
-//                         )
-//                       : Center(
-//                           child: Text(
-//                             'Aucune tâche ajoutée pour ce jour.',
-//                             style: TextStyle(color: Colors.grey),
-//                           ),
-//                         ),
+//           child: AlertDialog(
+//             title: Text('Confirmation'),
+//             content: SingleChildScrollView(
+//               child: ListBody(
+//                 children: <Widget>[
+//                   Text('Are you sure you want to delete this chantier?'),
 //                 ],
 //               ),
 //             ),
+//             actions: <Widget>[
+//               TextButton(
+//                 child: Text('Cancel'),
+//                 onPressed: () {
+//                   Navigator.of(context).pop();
+//                 },
+//               ),
+//               TextButton(
+//                 child: Text('Delete'),
+//                 onPressed: () {
+//                   Navigator.of(context).pop();
+//                   _deleteTask(id);
+//                 },
+//               ),
+//             ],
 //           ),
-//           actions: [
-//             TextButton(
-//               child: Text(
-//                 'Annuler',
-//                 style: TextStyle(color: Colors.redAccent),
-//               ),
-//               onPressed: () => Navigator.of(ctx).pop(),
-//             ),
-//             ElevatedButton(
-//               child: Text('Ajouter tâche'),
-//               onPressed: () => _showAddTaskDialog(ctx),
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Colors.green,
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(8),
-//                 ),
-//               ),
-//             ),
-//           ],
 //         );
 //       },
-//     ),
-//   );
-// }
-// // void _showAttendanceAgenda(BuildContext context) {
+//     );
+//   }
+
+//   Future<void> _deleteTask(String id) async {
+//     try {
+//       final response = await http.delete(Uri.parse('http://localhost:3000/chantiers/$id'));
+
+//       if (response.statusCode == 200) {
+//         setState(() {
+//           tasks.removeWhere((task) => task['_id'] == id);
+//         });
+//       } else {
+//         throw Exception('Failed to delete task');
+//       }
+//     } catch (e) {
+//       setState(() {
+//         errorMessage = 'Error deleting task: $e';
+//       });
+//     }
+//   }
+
+//   // void _showAttendanceAgenda(BuildContext context) {
+//   // DateTime _selectedDay = DateTime.now();
+
+//   // void _addTaskForDay(DateTime day, String task) {
+//   //   setState(() {
+//   //     if (_agenda[day] == null) {
+//   //       _agenda[day] = [];
+//   //     }
+//   //     _agenda[day]!.add(task);
+//   //   });
+//   // }
+
+//   // void _showAddTaskDialog(BuildContext ctx) {
+//   //   final _taskController = TextEditingController();
+
+//   //   showDialog(
+//   //     context: ctx,
+//   //     builder: (context) => AlertDialog(
+//   //       title: Text('Ajouter une tâche'),
+//   //       content: TextField(
+//   //         controller: _taskController,
+//   //         decoration: InputDecoration(hintText: 'Saisir la tâche'),
+//   //       ),
+//   //       actions: [
+//   //         TextButton(
+//   //           child: Text('Annuler'),
+//   //           onPressed: () => Navigator.of(context).pop(),
+//   //         ),
+//   //         ElevatedButton(
+//   //           child: Text('Ajouter'),
+//   //           onPressed: () {
+//   //             if (_taskController.text.isNotEmpty) {
+//   //               _addTaskForDay(_selectedDay, _taskController.text);
+//   //               Navigator.of(context).pop();
+//   //             }
+//   //           },
+//   //         ),
+//   //       ],
+//   //     ),
+//   //   );
+//   // }
+
+//   // showDialog(
+//   //   context: context,
+//   //   builder: (ctx) => StatefulBuilder(
+//   //     builder: (BuildContext context, StateSetter setState) {
+//   //       return AlertDialog(
+//   //         title: Text('Agenda des présences'),
+//   //         content: SizedBox(
+//   //           width: double.maxFinite, // Set a max width for the dialog content
+//   //           child: SingleChildScrollView(
+//   //             child: Column(
+//   //               crossAxisAlignment: CrossAxisAlignment.start,
+//   //               children: [
+//   //                 TableCalendar(
+//   //                   calendarStyle: CalendarStyle(
+//   //                     todayDecoration: BoxDecoration(
+//   //                       color: Colors.blueAccent,
+//   //                       shape: BoxShape.circle,
+//   //                     ),
+//   //                   ),
+//   //                   firstDay: DateTime.utc(2020, 1, 1),
+//   //                   lastDay: DateTime.utc(2100, 12, 31),
+//   //                   focusedDay: _selectedDay,
+//   //                   selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+//   //                   onDaySelected: (selectedDay, focusedDay) {
+//   //                     setState(() {
+//   //                       _selectedDay = selectedDay;
+//   //                     });
+//   //                   },
+//   //                 ),
+//   //                 SizedBox(height: 16.0),
+//   //                 _agenda[_selectedDay]?.isNotEmpty == true
+//   //                     ? Column(
+//   //                         crossAxisAlignment: CrossAxisAlignment.start,
+//   //                         children: _agenda[_selectedDay]!.map((task) {
+//   //                           return ListTile(
+//   //                             title: Text(task),
+//   //                           );
+//   //                         }).toList(),
+//   //                       )
+//   //                     : Text('Aucune tâche ajoutée pour ce jour.'),
+//   //               ],
+//   //             ),
+//   //           ),
+//   //         ),
+//   //         actions: [
+//   //           TextButton(
+//   //             child: Text('Annuler'),
+//   //             onPressed: () => Navigator.of(ctx).pop(),
+//   //           ),
+//   //           ElevatedButton(
+//   //             child: Text('Ajouter tâche'),
+//   //             onPressed: () => _showAddTaskDialog(ctx),
+//   //           ),
+//   //         ],
+//   //       );
+//   //     },
+//   //   ),
+//   // );
+//   // }
+
+// //   void _showAttendanceAgenda(BuildContext context) {
 // //   DateTime _selectedDay = DateTime.now();
 
 // //   void _addTaskForDay(DateTime day, String task) {
@@ -6969,24 +6811,9 @@ class _TaskManagementScreenState extends State<TaskManagementScreen> {
 // //         ),
 // //         content: TextField(
 // //           controller: _taskController,
-// //           style: TextStyle(color: Colors.black), // Set text color to black
 // //           decoration: InputDecoration(
 // //             hintText: 'Saisir la tâche',
-// //             hintStyle: TextStyle(color: Colors.grey), // Set hint text color
-// //             border: OutlineInputBorder(
-// //               borderRadius: BorderRadius.circular(12), // Rounded corners
-// //               borderSide: BorderSide(
-// //                 color: Colors.indigo, // Border color
-// //                 width: 2, // Border width
-// //               ),
-// //             ),
-// //             focusedBorder: OutlineInputBorder(
-// //               borderRadius: BorderRadius.circular(12), // Rounded corners
-// //               borderSide: BorderSide(
-// //                 color: Colors.indigo, // Border color when focused
-// //                 width: 2, // Border width when focused
-// //               ),
-// //             ),
+// //             border: OutlineInputBorder(),
 // //           ),
 // //         ),
 // //         actions: [
@@ -7007,11 +6834,9 @@ class _TaskManagementScreenState extends State<TaskManagementScreen> {
 // //             },
 // //             style: ElevatedButton.styleFrom(
 // //               backgroundColor: Colors.green,
-// //               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
 // //               shape: RoundedRectangleBorder(
 // //                 borderRadius: BorderRadius.circular(8),
 // //               ),
-// //               elevation: 5,
 // //             ),
 // //           ),
 // //         ],
@@ -7029,7 +6854,7 @@ class _TaskManagementScreenState extends State<TaskManagementScreen> {
 // //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
 // //           ),
 // //           content: SizedBox(
-// //             width: double.maxFinite, // Set a fixed width for the dialog
+// //             width: double.maxFinite,
 // //             child: SingleChildScrollView(
 // //               child: Column(
 // //                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -7044,7 +6869,7 @@ class _TaskManagementScreenState extends State<TaskManagementScreen> {
 // //                         color: Colors.orangeAccent,
 // //                         shape: BoxShape.circle,
 // //                       ),
-// //                       outsideDaysVisible: true, // Ensure outside days are visible
+// //                       outsideDaysVisible: false,
 // //                       weekendTextStyle: TextStyle(color: Colors.red),
 // //                       defaultTextStyle: TextStyle(color: Colors.black),
 // //                     ),
@@ -7109,11 +6934,9 @@ class _TaskManagementScreenState extends State<TaskManagementScreen> {
 // //               onPressed: () => _showAddTaskDialog(ctx),
 // //               style: ElevatedButton.styleFrom(
 // //                 backgroundColor: Colors.green,
-// //                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
 // //                 shape: RoundedRectangleBorder(
 // //                   borderRadius: BorderRadius.circular(8),
 // //                 ),
-// //                 elevation: 5,
 // //               ),
 // //             ),
 // //           ],
@@ -7122,302 +6945,183 @@ class _TaskManagementScreenState extends State<TaskManagementScreen> {
 // //     ),
 // //   );
 // // }
+// // // void _showAttendanceAgenda(BuildContext context) {
+// // //   DateTime _selectedDay = DateTime.now();
 
+// // //   void _addTaskForDay(DateTime day, String task) {
+// // //     setState(() {
+// // //       if (_agenda[day] == null) {
+// // //         _agenda[day] = [];
+// // //       }
+// // //       _agenda[day]!.add(task);
+// // //     });
+// // //   }
 
+// // //   void _showAddTaskDialog(BuildContext ctx) {
+// // //     final _taskController = TextEditingController();
 
-void _showAttendanceAgenda(BuildContext context) {
-  DateTime _selectedDay = DateTime.now();
+// // //     showDialog(
+// // //       context: ctx,
+// // //       builder: (context) => AlertDialog(
+// // //         title: Text(
+// // //           'Ajouter une tâche',
+// // //           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+// // //         ),
+// // //         content: TextField(
+// // //           controller: _taskController,
+// // //           style: TextStyle(color: Colors.black), // Set text color to black
+// // //           decoration: InputDecoration(
+// // //             hintText: 'Saisir la tâche',
+// // //             hintStyle: TextStyle(color: Colors.grey), // Set hint text color
+// // //             border: OutlineInputBorder(
+// // //               borderRadius: BorderRadius.circular(12), // Rounded corners
+// // //               borderSide: BorderSide(
+// // //                 color: Colors.indigo, // Border color
+// // //                 width: 2, // Border width
+// // //               ),
+// // //             ),
+// // //             focusedBorder: OutlineInputBorder(
+// // //               borderRadius: BorderRadius.circular(12), // Rounded corners
+// // //               borderSide: BorderSide(
+// // //                 color: Colors.indigo, // Border color when focused
+// // //                 width: 2, // Border width when focused
+// // //               ),
+// // //             ),
+// // //           ),
+// // //         ),
+// // //         actions: [
+// // //           TextButton(
+// // //             child: Text(
+// // //               'Annuler',
+// // //               style: TextStyle(color: Colors.redAccent),
+// // //             ),
+// // //             onPressed: () => Navigator.of(context).pop(),
+// // //           ),
+// // //           ElevatedButton(
+// // //             child: Text('Ajouter'),
+// // //             onPressed: () {
+// // //               if (_taskController.text.isNotEmpty) {
+// // //                 _addTaskForDay(_selectedDay, _taskController.text);
+// // //                 Navigator.of(context).pop();
+// // //               }
+// // //             },
+// // //             style: ElevatedButton.styleFrom(
+// // //               backgroundColor: Colors.green,
+// // //               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+// // //               shape: RoundedRectangleBorder(
+// // //                 borderRadius: BorderRadius.circular(8),
+// // //               ),
+// // //               elevation: 5,
+// // //             ),
+// // //           ),
+// // //         ],
+// // //       ),
+// // //     );
+// // //   }
 
-  void _addTaskForDay(DateTime day, String task) async {
-    final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-
-    final response = await http.post(
-      Uri.parse('http://localhost:3000/api/agenda/add-task'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'date': formattedDate,
-        'task': task,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      setState(() {
-        if (_agenda[day] == null) {
-          _agenda[day] = [];
-        }
-        _agenda[day]!.add(task);
-      });
-    } else {
-      print('Erreur lors de l\'ajout de la tâche : ${response.body}');
-    }
-  }
-  void _deleteTaskForDay(DateTime day, String task) async {
-  final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-
-  final response = await http.delete(
-    Uri.parse('http://localhost:3000/api/agenda/delete-task'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode({
-      'date': formattedDate,
-      'task': task,
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    setState(() {
-      _agenda[day]?.remove(task);
-    });
-  } else {
-    print('Erreur lors de la suppression de la tâche : ${response.body}');
-  }
-}
-
-void _validateTaskForDay(DateTime day, String task) async {
-  final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-
-  final response = await http.post(
-    Uri.parse('http://localhost:3000/api/agenda/validate-task'),
-    headers: {'Content-Type': 'application/json'},
-    body: json.encode({
-      'date': formattedDate,
-      'task': task,
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    setState(() {
-      final index = _agenda[day]?.indexOf(task);
-      if (index != null && index >= 0) {
-        _agenda[day]![index] += ' (Validée)';
-      }
-    });
-  } else {
-    print('Erreur lors de la validation de la tâche : ${response.body}');
-  }
-}
-  void _loadTasksForDay(DateTime day) async {
-    final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
-
-    final response = await http.get(
-      Uri.parse('http://localhost:3000/api/agenda/get-tasks/$formattedDate'),
-    );
-
-    if (response.statusCode == 200) {
-      final tasks = json.decode(response.body)['tasks'];
-      setState(() {
-        _agenda[day] = List<String>.from(tasks);
-      });
-    } else if (response.statusCode == 404) {
-      setState(() {
-        _agenda[day] = [];
-      });
-    } else {
-      print('Erreur lors de la récupération des tâches : ${response.body}');
-    }
-  }
-
-  void _showAddTaskDialog(BuildContext ctx) {
-    final _taskController = TextEditingController();
-
-    showDialog(
-      context: ctx,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Ajouter une tâche',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
-        ),
-        content: TextField(
-          controller: _taskController,
-          style: TextStyle(color: Colors.black), // Set text color to black
-          decoration: InputDecoration(
-            hintText: 'Saisir la tâche',
-            hintStyle: TextStyle(color: Colors.grey), // Set hint text color
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12), // Rounded corners
-              borderSide: BorderSide(
-                color: Colors.indigo, // Border color
-                width: 2, // Border width
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12), // Rounded corners
-              borderSide: BorderSide(
-                color: Colors.indigo, // Border color when focused
-                width: 2, // Border width when focused
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              'Annuler',
-              style: TextStyle(color: Colors.redAccent),
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          ElevatedButton(
-            child: Text('Ajouter'),
-            onPressed: () {
-              if (_taskController.text.isNotEmpty) {
-                _addTaskForDay(_selectedDay, _taskController.text);
-                Navigator.of(context).pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  showDialog(
-    context: context,
-    builder: (ctx) => StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
-        return AlertDialog(
-          title: Text(
-            'Agenda des présences',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TableCalendar(
-                    calendarStyle: CalendarStyle(
-                      todayDecoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        shape: BoxShape.circle,
-                      ),
-                      selectedDecoration: BoxDecoration(
-                        color: Colors.orangeAccent,
-                        shape: BoxShape.circle,
-                      ),
-                      outsideDaysVisible: true, // Ensure outside days are visible
-                      weekendTextStyle: TextStyle(color: Colors.red),
-                      defaultTextStyle: TextStyle(color: Colors.black),
-                    ),
-                    headerStyle: HeaderStyle(
-                      formatButtonVisible: false,
-                      titleCentered: true,
-                      titleTextStyle: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.indigo,
-                      ),
-                      leftChevronIcon: Icon(Icons.chevron_left, color: Colors.indigo),
-                      rightChevronIcon: Icon(Icons.chevron_right, color: Colors.indigo),
-                    ),
-                    firstDay: DateTime.utc(2020, 1, 1),
-                    lastDay: DateTime.utc(2100, 12, 31),
-                    focusedDay: _selectedDay,
-                    selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-                    onDaySelected: (selectedDay, focusedDay) {
-                      setState(() {
-                        _selectedDay = selectedDay;
-                      });
-                      _loadTasksForDay(_selectedDay);
-                    },
-                  ),
-          //         SizedBox(height: 16.0),
-          //         _agenda[_selectedDay]?.isNotEmpty == true
-          //             ? Column(
-          //                 crossAxisAlignment: CrossAxisAlignment.start,
-          //                 children: _agenda[_selectedDay]!.map((task) {
-          //                   return ListTile(
-          //                     leading: Icon(Icons.check_circle, color: Colors.green),
-          //                     title: Text(task),
-          //                     trailing: Icon(Icons.delete, color: Colors.redAccent),
-          //                     onTap: () {
-          //                       setState(() {
-          //                         _agenda[_selectedDay]!.remove(task);
-          //                       });
-          //                     },
-          //                   );
-          //                 }).toList(),
-          //               )
-          //             : Center(
-          //                 child: Text(
-          //                   'Aucune tâche ajoutée pour ce jour.',
-          //                   style: TextStyle(color: Colors.grey),
-          //                 ),
-          //               ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
-          SizedBox(height: 16.0),
-          _agenda[_selectedDay]?.isNotEmpty == true
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _agenda[_selectedDay]!.map((task) {
-                    return ListTile(
-                      leading: IconButton(
-                        icon: Icon(Icons.check_circle, color: Colors.green),
-                        onPressed: () {
-                          // Validation de la tâche
-                          _validateTaskForDay(_selectedDay, task);
-                        },
-                      ),
-                      title: Text(task),
-                      trailing: IconButton(
-                        icon: Icon(Icons.delete, color: Colors.redAccent),
-                        onPressed: () {
-                          // Suppression de la tâche
-                          _deleteTaskForDay(_selectedDay, task);
-                        },
-                      ),
-                    );
-                  }).toList(),
-                )
-              : Center(
-                  child: Text(
-                    'Aucune tâche ajoutée pour ce jour.',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                ],
-                ),
-                ),
-                ),
-          actions: [
-            TextButton(
-              child: Text(
-                'Annuler',
-                style: TextStyle(color: Colors.redAccent),
-              ),
-              onPressed: () => Navigator.of(ctx).pop(),
-            ),
-            ElevatedButton(
-              child: Text('Ajouter tâche'),
-              onPressed: () => _showAddTaskDialog(ctx),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 5,
-              ),
-            ),
-          ],
-        );
-      },
-    ),
-  );
-}
-
-
+// // //   showDialog(
+// // //     context: context,
+// // //     builder: (ctx) => StatefulBuilder(
+// // //       builder: (BuildContext context, StateSetter setState) {
+// // //         return AlertDialog(
+// // //           title: Text(
+// // //             'Agenda des présences',
+// // //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+// // //           ),
+// // //           content: SizedBox(
+// // //             width: double.maxFinite, // Set a fixed width for the dialog
+// // //             child: SingleChildScrollView(
+// // //               child: Column(
+// // //                 crossAxisAlignment: CrossAxisAlignment.start,
+// // //                 children: [
+// // //                   TableCalendar(
+// // //                     calendarStyle: CalendarStyle(
+// // //                       todayDecoration: BoxDecoration(
+// // //                         color: Colors.blueAccent,
+// // //                         shape: BoxShape.circle,
+// // //                       ),
+// // //                       selectedDecoration: BoxDecoration(
+// // //                         color: Colors.orangeAccent,
+// // //                         shape: BoxShape.circle,
+// // //                       ),
+// // //                       outsideDaysVisible: true, // Ensure outside days are visible
+// // //                       weekendTextStyle: TextStyle(color: Colors.red),
+// // //                       defaultTextStyle: TextStyle(color: Colors.black),
+// // //                     ),
+// // //                     headerStyle: HeaderStyle(
+// // //                       formatButtonVisible: false,
+// // //                       titleCentered: true,
+// // //                       titleTextStyle: TextStyle(
+// // //                         fontSize: 18.0,
+// // //                         fontWeight: FontWeight.bold,
+// // //                         color: Colors.indigo,
+// // //                       ),
+// // //                       leftChevronIcon: Icon(Icons.chevron_left, color: Colors.indigo),
+// // //                       rightChevronIcon: Icon(Icons.chevron_right, color: Colors.indigo),
+// // //                     ),
+// // //                     firstDay: DateTime.utc(2020, 1, 1),
+// // //                     lastDay: DateTime.utc(2100, 12, 31),
+// // //                     focusedDay: _selectedDay,
+// // //                     selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+// // //                     onDaySelected: (selectedDay, focusedDay) {
+// // //                       setState(() {
+// // //                         _selectedDay = selectedDay;
+// // //                       });
+// // //                     },
+// // //                   ),
+// // //                   SizedBox(height: 16.0),
+// // //                   _agenda[_selectedDay]?.isNotEmpty == true
+// // //                       ? Column(
+// // //                           crossAxisAlignment: CrossAxisAlignment.start,
+// // //                           children: _agenda[_selectedDay]!.map((task) {
+// // //                             return ListTile(
+// // //                               leading: Icon(Icons.check_circle, color: Colors.green),
+// // //                               title: Text(task),
+// // //                               trailing: Icon(Icons.delete, color: Colors.redAccent),
+// // //                               onTap: () {
+// // //                                 setState(() {
+// // //                                   _agenda[_selectedDay]!.remove(task);
+// // //                                 });
+// // //                               },
+// // //                             );
+// // //                           }).toList(),
+// // //                         )
+// // //                       : Center(
+// // //                           child: Text(
+// // //                             'Aucune tâche ajoutée pour ce jour.',
+// // //                             style: TextStyle(color: Colors.grey),
+// // //                           ),
+// // //                         ),
+// // //                 ],
+// // //               ),
+// // //             ),
+// // //           ),
+// // //           actions: [
+// // //             TextButton(
+// // //               child: Text(
+// // //                 'Annuler',
+// // //                 style: TextStyle(color: Colors.redAccent),
+// // //               ),
+// // //               onPressed: () => Navigator.of(ctx).pop(),
+// // //             ),
+// // //             ElevatedButton(
+// // //               child: Text('Ajouter tâche'),
+// // //               onPressed: () => _showAddTaskDialog(ctx),
+// // //               style: ElevatedButton.styleFrom(
+// // //                 backgroundColor: Colors.green,
+// // //                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+// // //                 shape: RoundedRectangleBorder(
+// // //                   borderRadius: BorderRadius.circular(8),
+// // //                 ),
+// // //                 elevation: 5,
+// // //               ),
+// // //             ),
+// // //           ],
+// // //         );
+// // //       },
+// // //     ),
+// // //   );
+// // // }
 
 // void _showAttendanceAgenda(BuildContext context) {
 //   DateTime _selectedDay = DateTime.now();
@@ -7445,7 +7149,50 @@ void _validateTaskForDay(DateTime day, String task) async {
 //       print('Erreur lors de l\'ajout de la tâche : ${response.body}');
 //     }
 //   }
+//   void _deleteTaskForDay(DateTime day, String task) async {
+//   final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
 
+//   final response = await http.delete(
+//     Uri.parse('http://localhost:3000/api/agenda/delete-task'),
+//     headers: {'Content-Type': 'application/json'},
+//     body: json.encode({
+//       'date': formattedDate,
+//       'task': task,
+//     }),
+//   );
+
+//   if (response.statusCode == 200) {
+//     setState(() {
+//       _agenda[day]?.remove(task);
+//     });
+//   } else {
+//     print('Erreur lors de la suppression de la tâche : ${response.body}');
+//   }
+// }
+
+// void _validateTaskForDay(DateTime day, String task) async {
+//   final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+
+//   final response = await http.post(
+//     Uri.parse('http://localhost:3000/api/agenda/validate-task'),
+//     headers: {'Content-Type': 'application/json'},
+//     body: json.encode({
+//       'date': formattedDate,
+//       'task': task,
+//     }),
+//   );
+
+//   if (response.statusCode == 200) {
+//     setState(() {
+//       final index = _agenda[day]?.indexOf(task);
+//       if (index != null && index >= 0) {
+//         _agenda[day]![index] += ' (Validée)';
+//       }
+//     });
+//   } else {
+//     print('Erreur lors de la validation de la tâche : ${response.body}');
+//   }
+// }
 //   void _loadTasksForDay(DateTime day) async {
 //     final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
 
@@ -7473,14 +7220,38 @@ void _validateTaskForDay(DateTime day, String task) async {
 //     showDialog(
 //       context: ctx,
 //       builder: (context) => AlertDialog(
-//         title: Text('Ajouter une tâche'),
+//         title: Text(
+//           'Ajouter une tâche',
+//           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+//         ),
 //         content: TextField(
 //           controller: _taskController,
-//           decoration: InputDecoration(hintText: 'Saisir la tâche'),
+//           style: TextStyle(color: Colors.black), // Set text color to black
+//           decoration: InputDecoration(
+//             hintText: 'Saisir la tâche',
+//             hintStyle: TextStyle(color: Colors.grey), // Set hint text color
+//             border: OutlineInputBorder(
+//               borderRadius: BorderRadius.circular(12), // Rounded corners
+//               borderSide: BorderSide(
+//                 color: Colors.indigo, // Border color
+//                 width: 2, // Border width
+//               ),
+//             ),
+//             focusedBorder: OutlineInputBorder(
+//               borderRadius: BorderRadius.circular(12), // Rounded corners
+//               borderSide: BorderSide(
+//                 color: Colors.indigo, // Border color when focused
+//                 width: 2, // Border width when focused
+//               ),
+//             ),
+//           ),
 //         ),
 //         actions: [
 //           TextButton(
-//             child: Text('Annuler'),
+//             child: Text(
+//               'Annuler',
+//               style: TextStyle(color: Colors.redAccent),
+//             ),
 //             onPressed: () => Navigator.of(context).pop(),
 //           ),
 //           ElevatedButton(
@@ -7491,6 +7262,14 @@ void _validateTaskForDay(DateTime day, String task) async {
 //                 Navigator.of(context).pop();
 //               }
 //             },
+//             style: ElevatedButton.styleFrom(
+//               backgroundColor: Colors.green,
+//               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+//               shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(8),
+//               ),
+//               elevation: 5,
+//             ),
 //           ),
 //         ],
 //       ),
@@ -7502,7 +7281,10 @@ void _validateTaskForDay(DateTime day, String task) async {
 //     builder: (ctx) => StatefulBuilder(
 //       builder: (BuildContext context, StateSetter setState) {
 //         return AlertDialog(
-//           title: Text('Agenda des présences'),
+//           title: Text(
+//             'Agenda des présences',
+//             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+//           ),
 //           content: SizedBox(
 //             width: double.maxFinite,
 //             child: SingleChildScrollView(
@@ -7515,6 +7297,24 @@ void _validateTaskForDay(DateTime day, String task) async {
 //                         color: Colors.blueAccent,
 //                         shape: BoxShape.circle,
 //                       ),
+//                       selectedDecoration: BoxDecoration(
+//                         color: Colors.orangeAccent,
+//                         shape: BoxShape.circle,
+//                       ),
+//                       outsideDaysVisible: true, // Ensure outside days are visible
+//                       weekendTextStyle: TextStyle(color: Colors.red),
+//                       defaultTextStyle: TextStyle(color: Colors.black),
+//                     ),
+//                     headerStyle: HeaderStyle(
+//                       formatButtonVisible: false,
+//                       titleCentered: true,
+//                       titleTextStyle: TextStyle(
+//                         fontSize: 18.0,
+//                         fontWeight: FontWeight.bold,
+//                         color: Colors.indigo,
+//                       ),
+//                       leftChevronIcon: Icon(Icons.chevron_left, color: Colors.indigo),
+//                       rightChevronIcon: Icon(Icons.chevron_right, color: Colors.indigo),
 //                     ),
 //                     firstDay: DateTime.utc(2020, 1, 1),
 //                     lastDay: DateTime.utc(2100, 12, 31),
@@ -7527,29 +7327,86 @@ void _validateTaskForDay(DateTime day, String task) async {
 //                       _loadTasksForDay(_selectedDay);
 //                     },
 //                   ),
-//                   SizedBox(height: 16.0),
-//                   _agenda[_selectedDay]?.isNotEmpty == true
-//                       ? Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: _agenda[_selectedDay]!.map((task) {
-//                             return ListTile(
-//                               title: Text(task),
-//                             );
-//                           }).toList(),
-//                         )
-//                       : Text('Aucune tâche ajoutée pour ce jour.'),
+//           //         SizedBox(height: 16.0),
+//           //         _agenda[_selectedDay]?.isNotEmpty == true
+//           //             ? Column(
+//           //                 crossAxisAlignment: CrossAxisAlignment.start,
+//           //                 children: _agenda[_selectedDay]!.map((task) {
+//           //                   return ListTile(
+//           //                     leading: Icon(Icons.check_circle, color: Colors.green),
+//           //                     title: Text(task),
+//           //                     trailing: Icon(Icons.delete, color: Colors.redAccent),
+//           //                     onTap: () {
+//           //                       setState(() {
+//           //                         _agenda[_selectedDay]!.remove(task);
+//           //                       });
+//           //                     },
+//           //                   );
+//           //                 }).toList(),
+//           //               )
+//           //             : Center(
+//           //                 child: Text(
+//           //                   'Aucune tâche ajoutée pour ce jour.',
+//           //                   style: TextStyle(color: Colors.grey),
+//           //                 ),
+//           //               ),
+//           //       ],
+//           //     ),
+//           //   ),
+//           // ),
+//           SizedBox(height: 16.0),
+//           _agenda[_selectedDay]?.isNotEmpty == true
+//               ? Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: _agenda[_selectedDay]!.map((task) {
+//                     return ListTile(
+//                       leading: IconButton(
+//                         icon: Icon(Icons.check_circle, color: Colors.green),
+//                         onPressed: () {
+//                           // Validation de la tâche
+//                           _validateTaskForDay(_selectedDay, task);
+//                         },
+//                       ),
+//                       title: Text(task),
+//                       trailing: IconButton(
+//                         icon: Icon(Icons.delete, color: Colors.redAccent),
+//                         onPressed: () {
+//                           // Suppression de la tâche
+//                           _deleteTaskForDay(_selectedDay, task);
+//                         },
+//                       ),
+//                     );
+//                   }).toList(),
+//                 )
+//               : Center(
+//                   child: Text(
+//                     'Aucune tâche ajoutée pour ce jour.',
+//                     style: TextStyle(color: Colors.grey),
+//                   ),
+//                 ),
 //                 ],
-//               ),
-//             ),
-//           ),
+//                 ),
+//                 ),
+//                 ),
 //           actions: [
 //             TextButton(
-//               child: Text('Annuler'),
+//               child: Text(
+//                 'Annuler',
+//                 style: TextStyle(color: Colors.redAccent),
+//               ),
 //               onPressed: () => Navigator.of(ctx).pop(),
 //             ),
 //             ElevatedButton(
 //               child: Text('Ajouter tâche'),
 //               onPressed: () => _showAddTaskDialog(ctx),
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: Colors.green,
+//                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8),
+//                 ),
+//                 elevation: 5,
+//               ),
 //             ),
 //           ],
 //         );
@@ -7558,261 +7415,1548 @@ void _validateTaskForDay(DateTime day, String task) async {
 //   );
 // }
 
+// // void _showAttendanceAgenda(BuildContext context) {
+// //   DateTime _selectedDay = DateTime.now();
 
+// //   void _addTaskForDay(DateTime day, String task) async {
+// //     final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+
+// //     final response = await http.post(
+// //       Uri.parse('http://localhost:3000/api/agenda/add-task'),
+// //       headers: {'Content-Type': 'application/json'},
+// //       body: json.encode({
+// //         'date': formattedDate,
+// //         'task': task,
+// //       }),
+// //     );
+
+// //     if (response.statusCode == 201) {
+// //       setState(() {
+// //         if (_agenda[day] == null) {
+// //           _agenda[day] = [];
+// //         }
+// //         _agenda[day]!.add(task);
+// //       });
+// //     } else {
+// //       print('Erreur lors de l\'ajout de la tâche : ${response.body}');
+// //     }
+// //   }
+
+// //   void _loadTasksForDay(DateTime day) async {
+// //     final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+
+// //     final response = await http.get(
+// //       Uri.parse('http://localhost:3000/api/agenda/get-tasks/$formattedDate'),
+// //     );
+
+// //     if (response.statusCode == 200) {
+// //       final tasks = json.decode(response.body)['tasks'];
+// //       setState(() {
+// //         _agenda[day] = List<String>.from(tasks);
+// //       });
+// //     } else if (response.statusCode == 404) {
+// //       setState(() {
+// //         _agenda[day] = [];
+// //       });
+// //     } else {
+// //       print('Erreur lors de la récupération des tâches : ${response.body}');
+// //     }
+// //   }
+
+// //   void _showAddTaskDialog(BuildContext ctx) {
+// //     final _taskController = TextEditingController();
+
+// //     showDialog(
+// //       context: ctx,
+// //       builder: (context) => AlertDialog(
+// //         title: Text('Ajouter une tâche'),
+// //         content: TextField(
+// //           controller: _taskController,
+// //           decoration: InputDecoration(hintText: 'Saisir la tâche'),
+// //         ),
+// //         actions: [
+// //           TextButton(
+// //             child: Text('Annuler'),
+// //             onPressed: () => Navigator.of(context).pop(),
+// //           ),
+// //           ElevatedButton(
+// //             child: Text('Ajouter'),
+// //             onPressed: () {
+// //               if (_taskController.text.isNotEmpty) {
+// //                 _addTaskForDay(_selectedDay, _taskController.text);
+// //                 Navigator.of(context).pop();
+// //               }
+// //             },
+// //           ),
+// //         ],
+// //       ),
+// //     );
+// //   }
+
+// //   showDialog(
+// //     context: context,
+// //     builder: (ctx) => StatefulBuilder(
+// //       builder: (BuildContext context, StateSetter setState) {
+// //         return AlertDialog(
+// //           title: Text('Agenda des présences'),
+// //           content: SizedBox(
+// //             width: double.maxFinite,
+// //             child: SingleChildScrollView(
+// //               child: Column(
+// //                 crossAxisAlignment: CrossAxisAlignment.start,
+// //                 children: [
+// //                   TableCalendar(
+// //                     calendarStyle: CalendarStyle(
+// //                       todayDecoration: BoxDecoration(
+// //                         color: Colors.blueAccent,
+// //                         shape: BoxShape.circle,
+// //                       ),
+// //                     ),
+// //                     firstDay: DateTime.utc(2020, 1, 1),
+// //                     lastDay: DateTime.utc(2100, 12, 31),
+// //                     focusedDay: _selectedDay,
+// //                     selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+// //                     onDaySelected: (selectedDay, focusedDay) {
+// //                       setState(() {
+// //                         _selectedDay = selectedDay;
+// //                       });
+// //                       _loadTasksForDay(_selectedDay);
+// //                     },
+// //                   ),
+// //                   SizedBox(height: 16.0),
+// //                   _agenda[_selectedDay]?.isNotEmpty == true
+// //                       ? Column(
+// //                           crossAxisAlignment: CrossAxisAlignment.start,
+// //                           children: _agenda[_selectedDay]!.map((task) {
+// //                             return ListTile(
+// //                               title: Text(task),
+// //                             );
+// //                           }).toList(),
+// //                         )
+// //                       : Text('Aucune tâche ajoutée pour ce jour.'),
+// //                 ],
+// //               ),
+// //             ),
+// //           ),
+// //           actions: [
+// //             TextButton(
+// //               child: Text('Annuler'),
+// //               onPressed: () => Navigator.of(ctx).pop(),
+// //             ),
+// //             ElevatedButton(
+// //               child: Text('Ajouter tâche'),
+// //               onPressed: () => _showAddTaskDialog(ctx),
+// //             ),
+// //           ],
+// //         );
+// //       },
+// //     ),
+// //   );
+// // }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Column(
+//         children: [
+//           //Your existing UI components like CustomAppBar
+//           SizedBox(
+//             height: 72.v,
+//             width: MediaQuery.of(context).size.width,
+//             child: Stack(
+//               alignment: Alignment.bottomCenter,
+//               children: [
+//                 Align(
+//                   alignment: Alignment.topCenter,
+//                   child: Container(
+//                     width: MediaQuery.of(context).size.width,
+//                     padding: EdgeInsets.symmetric(vertical: 20.v),
+//                     decoration: BoxDecoration(
+//                       borderRadius: BorderRadius.circular(20),
+//                       image: DecorationImage(
+//                         image: AssetImage(ImageConstant.imgGroup62),
+//                         fit: BoxFit.cover,
+//                       ),
+//                     ),
+//                     child: CustomAppBar(
+//                       leadingWidth: 35.h,
+//                       leading: GestureDetector(
+//                         onTap: () => _openMenu(context),
+//                         child: Padding(
+//                           padding: EdgeInsets.only(left: 20.h),
+//                           child: Icon(
+//                             Icons.menu,
+//                             color: Colors.white,
+//                           ),
+//                         ),
+//                       ),
+//                       title: Container(
+//                         width: 1000.h,
+//                         child: Center(
+//                           child: Text(
+//                             'Suivi chantier',
+//                             style: TextStyle(
+//                               color: Colors.white,
+//                               fontSize: 30.h,
+//                             ),
+//                             overflow: TextOverflow.ellipsis,
+//                           ),
+//                         ),
+//                       ),
+//                       bottom: PreferredSize(
+//                         preferredSize: Size.fromHeight(1.h),
+//                         child: Container(
+//                           color: Colors.grey[800],
+//                           height: 1.h,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Divider(
+//             color: Colors.white,
+//             thickness: 2.0,
+//             height: 1.0,
+//             indent: 20.0,
+//             endIndent: 20.0,
+//           ),
+//           Padding(
+//             // padding: const EdgeInsets.all(50.0),
+//             padding: const EdgeInsets.all(10.0),
+//             child: SingleChildScrollView(
+//               scrollDirection: Axis.horizontal,
+//               child: Row(
+//                 children: [
+//                   ElevatedButton(
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(builder: (context) => AddChantierForm()),
+//                       );
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.blue,
+//                       foregroundColor: Colors.white,
+//                       padding: EdgeInsets.symmetric(
+//                           horizontal: 24.0, vertical: 12.0),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(12.0),
+//                       ),
+//                       elevation: 5,
+//                       textStyle: TextStyle(
+//                         fontSize: 16.0,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                     child: Text('Ajouter un chantier'),
+//                   ),
+//                   // SizedBox(width: 50.0),
+//                   // ElevatedButton(
+//                   //   onPressed: () {
+//                   //     // Button action
+//                   //   },
+//                   //   style: ElevatedButton.styleFrom(
+//                   //     backgroundColor: Colors.green,
+//                   //     foregroundColor: Colors.white,
+//                   //     padding: EdgeInsets.symmetric(
+//                   //         horizontal: 24.0, vertical: 12.0),
+//                   //     shape: RoundedRectangleBorder(
+//                   //       borderRadius: BorderRadius.circular(12.0),
+//                   //     ),
+//                   //     elevation: 5,
+//                   //     textStyle: TextStyle(
+//                   //       fontSize: 16.0,
+//                   //       fontWeight: FontWeight.bold,
+//                   //     ),
+//                   //   ),
+//                   //   child: Text('Affecter des personnel'),
+//                   // ),
+//                   // SizedBox(width: 50.0),
+//                   SizedBox(width: 40.0),
+//                   Padding(padding:
+//                   EdgeInsets.only(top: 30.0, bottom: 20.0)),
+//                   ElevatedButton(
+//                     onPressed: () => _showAttendanceAgenda(context),
+//                     child: Row(
+//                       children: [
+//                         Icon(Icons.calendar_today, color: Color.fromARGB(255, 255, 255, 255)),
+//                         SizedBox(width: 6),
+
+//                         Text(
+//                           'Agenda des présences',
+//                           style:TextStyle(
+//                         fontSize: 16.0,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                       ), // Couleur du texte
+//                       ],
+//                     ),
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.orange,
+//                       foregroundColor: Colors.white, // Définit la couleur du texte et des icônes
+//                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+//                     ),
+//                   ),
+//                 //   SizedBox(width: 10.0),
+//                 //   ElevatedButton(
+//                 //   onPressed: () => _showAttendanceAgenda(context),
+//                 //   child: Row(
+//                 //     children: [
+//                 //       Icon(Icons.calendar_today, color: Color.fromARGB(255, 255, 255, 255)),
+//                 //       SizedBox(width: 4),
+//                 //       Text('Agenda des présences'),
+//                 //     ],
+//                 //   ),
+//                 //   style: ElevatedButton.styleFrom(
+//                 //     backgroundColor: Colors.orange,
+//                 //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+//                 //   ),
+//                 // ),
+
+//           //         SizedBox(width: 10.0),
+//           //         ElevatedButton(
+//           //           onPressed: () {
+//           //             // Button action
+//           //           },
+//           //           style: ElevatedButton.styleFrom(
+//           //             backgroundColor: Colors.orange,
+//           //             foregroundColor: Colors.white,
+//           //             padding: EdgeInsets.symmetric(
+//           //                 horizontal: 24.0, vertical: 12.0),
+//           //             shape: RoundedRectangleBorder(
+//           //               borderRadius: BorderRadius.circular(12.0),
+//           //             ),
+//           //             elevation: 5,
+//           //             textStyle: TextStyle(
+//           //               fontSize: 16.0,
+//           //               fontWeight: FontWeight.bold,
+//           //             ),
+//           //           ),
+//           //           child: Text('Agenda des présences'),
+//           //         ),
+//            ],
+//           ),
+//            ),
+//           ),
+//           Expanded(
+//             child: isLoading
+//                 ? Center(child: CircularProgressIndicator())
+//                 : errorMessage != null
+//                     ? Center(child: Text(errorMessage!))
+//                     : SingleChildScrollView(
+//                         scrollDirection: Axis.vertical,
+//                         child: SingleChildScrollView(
+//                           scrollDirection: Axis.horizontal,
+//                           child: DataTable(
+//                             columns: [
+//                               DataColumn(label: Text('Libellé')),
+//                               DataColumn(label: Text('Description')),
+//                               DataColumn(label: Text('Date Début')),
+//                               DataColumn(label: Text('Date Fin Prev.')),
+//                               DataColumn(label: Text('Chef Chantier')),
+//                               DataColumn(label: Text('Actions')),
+//                             ],
+//                             rows: tasks.map((task) {
+//                               return DataRow(cells: [
+//                                 DataCell(Text(task['libelle'] ?? '')),
+//                                 DataCell(Text(task['description'] ?? '')),
+//                                 DataCell(Text(task['dateDebut'] ?? '')),
+//                                 DataCell(Text(task['dateFinPrev'] ?? '')),
+//                                 DataCell(Text(task['chefChantier'] ?? '')),
+//                                 DataCell(Row(
+//                                   children: [
+//                                     TextButton(
+//                                       onPressed: () {
+//                                         // Delete task action
+//                                         //_deleteTask(task['_id']);
+//                                         _confirmDeleteTask(context, task['_id']);
+//                                       },
+//                                       child: Text('Supprimer',
+//                                           style: TextStyle(color: Colors.blue)),
+//                                     ),
+//                                     // TextButton(
+//                                     //   onPressed: () {
+//                                     //     // Add attendance action
+
+//                                     //   },
+//                                     //   child: Text('Ajouter les présences',
+//                                     //       style: TextStyle(color: Colors.blue)),
+//                                     // ),
+//                                     TextButton(
+//                                       onPressed: () {
+//                                         // Attendance agenda action
+//                                         _showAttendanceAgenda(context);
+//                                       },
+//                                       child: Text('Agenda des présences',
+//                                           style: TextStyle(color: Colors.blue)),
+//                                     ),
+//                                   ],
+//                                 )),
+//                               ]);
+//                             }).toList(),
+//                           ),
+//                         ),
+//                       ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//    void _openMenu(BuildContext context) {
+//     Navigator.pushNamed(context, AppRoutes.menuScreen);
+//   }
+// }
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:gecimmoa/core/app_export.dart';
+import 'package:http/http.dart' as http;
+import 'package:gecimmoa/widgets/app_bar/custom_app_bar.dart';
+import 'package:gecimmoa/presentation/suivi_terrain_screen/widgets/AddChantierForm.dart';
+import 'package:table_calendar/table_calendar.dart';
+
+class TaskManagementScreen extends StatefulWidget {
+  @override
+  _TaskManagementScreenState createState() => _TaskManagementScreenState();
+}
+
+class _TaskManagementScreenState extends State<TaskManagementScreen> {
+  List<Map<String, dynamic>> tasks = [];
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    _fetchTasks();
+  }
+
+  final Map<DateTime, List<String>> _agenda = {};
+
+  Future<void> _fetchTasks() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/chantiers'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          tasks = data.map<Map<String, dynamic>>((task) {
+            return {
+              '_id': task['_id'],
+              'libelle': task['libelle'],
+              'description': task['description'],
+              'dateDebut': task['dateDebut'],
+              'dateFinPrev': task['dateFinPrev'],
+              'chefChantier': task['chefChantier'],
+            };
+          }).toList();
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load tasks');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Error fetching tasks: $e';
+      });
+    }
+  }
+
+  Future<void> _confirmDeleteTask(BuildContext context, String id) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            dialogBackgroundColor: appTheme.gray400, // Background color
+            textTheme: TextTheme(
+              bodyText1: TextStyle(color: Colors.white), // Text color
+              bodyText2: TextStyle(color: Colors.white),
+              button: TextStyle(color: Colors.blue), // Button text color
+            ),
+          ),
+          child: AlertDialog(
+            title: Text('Confirmation'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('Are you sure you want to delete this chantier?'),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Delete'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _deleteTask(id);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteTask(String id) async {
+    try {
+      final response =
+          await http.delete(Uri.parse('http://localhost:3000/chantiers/$id'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          tasks.removeWhere((task) => task['_id'] == id);
+        });
+      } else {
+        throw Exception('Failed to delete task');
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error deleting task: $e';
+      });
+    }
+  }
+
+  void _showAttendanceAgenda(BuildContext context) {
+    DateTime _selectedDay = DateTime.now();
+
+    void _addTaskForDay(DateTime day, String task) async {
+      final formattedDate =
+          "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/api/agenda/add-task'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'date': formattedDate,
+          'task': task,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        setState(() {
+          if (_agenda[day] == null) {
+            _agenda[day] = [];
+          }
+          _agenda[day]!.add(task);
+        });
+      } else {
+        print('Erreur lors de l\'ajout de la tâche : ${response.body}');
+      }
+    }
+
+    void _deleteTaskForDay(DateTime day, String task) async {
+      final formattedDate =
+          "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+
+      final response = await http.delete(
+        Uri.parse('http://localhost:3000/api/agenda/delete-task'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'date': formattedDate,
+          'task': task,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _agenda[day]?.remove(task);
+        });
+      } else {
+        print('Erreur lors de la suppression de la tâche : ${response.body}');
+      }
+    }
+
+    void _validateTaskForDay(DateTime day, String task) async {
+      final formattedDate =
+          "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/api/agenda/validate-task'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'date': formattedDate,
+          'task': task,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          final index = _agenda[day]?.indexOf(task);
+          if (index != null && index >= 0) {
+            _agenda[day]![index] += ' (Validée)';
+          }
+        });
+      } else {
+        print('Erreur lors de la validation de la tâche : ${response.body}');
+      }
+    }
+
+    void _loadTasksForDay(DateTime day) async {
+      final formattedDate =
+          "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/api/agenda/get-tasks/$formattedDate'),
+      );
+
+      if (response.statusCode == 200) {
+        final tasks = json.decode(response.body)['tasks'];
+        setState(() {
+          _agenda[day] = List<String>.from(tasks);
+        });
+      } else if (response.statusCode == 404) {
+        setState(() {
+          _agenda[day] = [];
+        });
+      } else {
+        print('Erreur lors de la récupération des tâches : ${response.body}');
+      }
+    }
+
+    void _showAddTaskDialog(BuildContext ctx) {
+      final _taskController = TextEditingController();
+
+      showDialog(
+        context: ctx,
+        builder: (context) => AlertDialog(
+          title: Text(
+            'Ajouter une tâche',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+          ),
+          content: TextField(
+            controller: _taskController,
+            style: TextStyle(color: Colors.black), // Set text color to black
+            decoration: InputDecoration(
+              hintText: 'Saisir la tâche',
+              hintStyle: TextStyle(color: Colors.grey), // Set hint text color
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12), // Rounded corners
+                borderSide: BorderSide(
+                  color: Colors.indigo, // Border color
+                  width: 2, // Border width
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12), // Rounded corners
+                borderSide: BorderSide(
+                  color: Colors.indigo, // Border color when focused
+                  width: 2, // Border width when focused
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Annuler',
+                style: TextStyle(color: Colors.redAccent),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              child: Text('Ajouter'),
+              onPressed: () {
+                if (_taskController.text.isNotEmpty) {
+                  _addTaskForDay(_selectedDay, _taskController.text);
+                  Navigator.of(context).pop();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 5,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return AlertDialog(
+            title: Text(
+              'Agenda des présences',
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TableCalendar(
+                      calendarStyle: CalendarStyle(
+                        todayDecoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        selectedDecoration: BoxDecoration(
+                          color: Colors.orangeAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        outsideDaysVisible:
+                            true, // Ensure outside days are visible
+                        weekendTextStyle: TextStyle(color: Colors.red),
+                        defaultTextStyle: TextStyle(color: Colors.black),
+                      ),
+                      headerStyle: HeaderStyle(
+                        formatButtonVisible: false,
+                        titleCentered: true,
+                        titleTextStyle: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo,
+                        ),
+                        leftChevronIcon:
+                            Icon(Icons.chevron_left, color: Colors.indigo),
+                        rightChevronIcon:
+                            Icon(Icons.chevron_right, color: Colors.indigo),
+                      ),
+                      firstDay: DateTime.utc(2020, 1, 1),
+                      lastDay: DateTime.utc(2100, 12, 31),
+                      focusedDay: _selectedDay,
+                      selectedDayPredicate: (day) =>
+                          isSameDay(day, _selectedDay),
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                        });
+                        _loadTasksForDay(_selectedDay);
+                      },
+                    ),
+                    SizedBox(height: 16.0),
+                    _agenda[_selectedDay]?.isNotEmpty == true
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: _agenda[_selectedDay]!.map((task) {
+                              return ListTile(
+                                leading: IconButton(
+                                  icon: Icon(Icons.check_circle,
+                                      color: Colors.green),
+                                  onPressed: () {
+                                    // Validation de la tâche
+                                    _validateTaskForDay(_selectedDay, task);
+                                  },
+                                ),
+                                title: Text(task),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete,
+                                      color: Colors.redAccent),
+                                  onPressed: () {
+                                    // Suppression de la tâche
+                                    _deleteTaskForDay(_selectedDay, task);
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          )
+                        : Center(
+                            child: Text(
+                              'Aucune tâche ajoutée pour ce jour.',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: Text(
+                  'Annuler',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+              ElevatedButton(
+                child: Text('Ajouter tâche'),
+                onPressed: () => _showAddTaskDialog(ctx),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 5,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Column(
+//         children: [
+//           //Your existing UI components like CustomAppBar
+//           SizedBox(
+//             height: 72.v,
+//             width: MediaQuery.of(context).size.width,
+//             child: Stack(
+//               alignment: Alignment.bottomCenter,
+//               children: [
+//                 Align(
+//                   alignment: Alignment.topCenter,
+//                   child: Container(
+//                     width: MediaQuery.of(context).size.width,
+//                     padding: EdgeInsets.symmetric(vertical: 20.v),
+//                     decoration: BoxDecoration(
+//                       borderRadius: BorderRadius.circular(20),
+//                       image: DecorationImage(
+//                         image: AssetImage(ImageConstant.imgGroup62),
+//                         fit: BoxFit.cover,
+//                       ),
+//                     ),
+//                     child: CustomAppBar(
+//                       leadingWidth: 35.h,
+//                       leading: GestureDetector(
+//                         onTap: () => _openMenu(context),
+//                         child: Padding(
+//                           padding: EdgeInsets.only(left: 20.h),
+//                           child: Icon(
+//                             Icons.menu,
+//                             color: Colors.white,
+//                           ),
+//                         ),
+//                       ),
+//                       title: Container(
+//                         width: 1000.h,
+//                         child: Center(
+//                           child: Text(
+//                             'Suivi chantier',
+//                             style: TextStyle(
+//                               color: Colors.white,
+//                               fontSize: 30.h,
+//                             ),
+//                             overflow: TextOverflow.ellipsis,
+//                           ),
+//                         ),
+//                       ),
+//                       bottom: PreferredSize(
+//                         preferredSize: Size.fromHeight(1.h),
+//                         child: Container(
+//                           color: Colors.grey[800],
+//                           height: 1.h,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Divider(
+//             color: Colors.white,
+//             thickness: 2.0,
+//             height: 1.0,
+//             indent: 20.0,
+//             endIndent: 20.0,
+//           ),
+//           Padding(
+//             // padding: const EdgeInsets.all(50.0),
+//             padding: const EdgeInsets.all(10.0),
+//             child: SingleChildScrollView(
+//               scrollDirection: Axis.horizontal,
+//               child: Row(
+//                 children: [
+//                   ElevatedButton(
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(builder: (context) => AddChantierForm()),
+//                       );
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.blue,
+//                       foregroundColor: Colors.white,
+//                       padding: EdgeInsets.symmetric(
+//                           horizontal: 24.0, vertical: 12.0),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(12.0),
+//                       ),
+//                       elevation: 5,
+//                       textStyle: TextStyle(
+//                         fontSize: 16.0,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                     child: Text('Ajouter un chantier'),
+//                   ),
+//                   SizedBox(width: 40.0),
+//                   Padding(padding:
+//                   EdgeInsets.only(top: 30.0, bottom: 20.0)),
+//                   ElevatedButton(
+//                     onPressed: () => _showAttendanceAgenda(context),
+//                     child: Row(
+//                       children: [
+//                         Icon(Icons.calendar_today, color: Color.fromARGB(255, 255, 255, 255)),
+//                         SizedBox(width: 6),
+
+//                         Text(
+//                           'Agenda des présences',
+//                           style:TextStyle(
+//                         fontSize: 16.0,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                       ), // Couleur du texte
+//                       ],
+//                     ),
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.orange,
+//                       foregroundColor: Colors.white, // Définit la couleur du texte et des icônes
+//                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+//                     ),
+//                   ),
+//            ],
+//           ),
+//            ),
+//           ),
+//           Expanded(
+//             child: isLoading
+//                 ? Center(child: CircularProgressIndicator())
+//                 : errorMessage != null
+//                     ? Center(child: Text(errorMessage!))
+//                     : SingleChildScrollView(
+//                         scrollDirection: Axis.vertical,
+//                         child: SingleChildScrollView(
+//                           scrollDirection: Axis.horizontal,
+//                           child: DataTable(
+//                             columns: [
+//                               DataColumn(label: Text('Libellé')),
+//                               DataColumn(label: Text('Description')),
+//                               DataColumn(label: Text('Date Début')),
+//                               DataColumn(label: Text('Date Fin Prev.')),
+//                               DataColumn(label: Text('Chef Chantier')),
+//                               DataColumn(label: Text('Actions')),
+//                             ],
+//                             rows: tasks.map((task) {
+//                               return DataRow(cells: [
+//                                 DataCell(Text(task['libelle'] ?? '')),
+//                                 DataCell(Text(task['description'] ?? '')),
+//                                 DataCell(Text(task['dateDebut'] ?? '')),
+//                                 DataCell(Text(task['dateFinPrev'] ?? '')),
+//                                 DataCell(Text(task['chefChantier'] ?? '')),
+//                                 DataCell(Row(
+//                                   children: [
+//                                     TextButton(
+//                                       onPressed: () {
+//                                         // Delete task action
+//                                         //_deleteTask(task['_id']);
+//                                         _confirmDeleteTask(context, task['_id']);
+//                                       },
+//                                       child: Text('Supprimer',
+//                                           style: TextStyle(color: Colors.blue)),
+//                                     ),
+//                                     // TextButton(
+//                                     //   onPressed: () {
+//                                     //     // Add attendance action
+
+//                                     //   },
+//                                     //   child: Text('Ajouter les présences',
+//                                     //       style: TextStyle(color: Colors.blue)),
+//                                     // ),
+//                                     TextButton(
+//                                       onPressed: () {
+//                                         // Attendance agenda action
+//                                         _showAttendanceAgenda(context);
+//                                       },
+//                                       child: Text('Agenda des présences',
+//                                           style: TextStyle(color: Colors.blue)),
+//                                     ),
+//                                   ],
+//                                 )),
+//                               ]);
+//                             }).toList(),
+//                           ),
+//                         ),
+//                       ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//    void _openMenu(BuildContext context) {
+//     Navigator.pushNamed(context, AppRoutes.menuScreen);
+//   }
+// }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: CustomAppBar(
+//         title: Text('Task Management'),
+//         actions: [
+//           IconButton(
+//             icon: Icon(Icons.refresh),
+//             onPressed: () {
+//               _fetchTasks();
+//             },
+//           ),
+//         ],
+//       ),
+//       body: isLoading
+//           ? Center(child: CircularProgressIndicator())
+//           : errorMessage != null
+//               ? Center(child: Text(errorMessage!))
+//               : Padding(
+//                   padding: const EdgeInsets.all(8.0),
+//                   child: GridView.builder(
+//                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//                       crossAxisCount: 2,
+//                       crossAxisSpacing: 10.0,
+//                       mainAxisSpacing: 10.0,
+//                       childAspectRatio: 3 / 2,
+//                     ),
+//                     itemCount: tasks.length,
+//                     itemBuilder: (context, index) {
+//                       final task = tasks[index];
+//                       return GestureDetector(
+//                         onTap: () {
+//                           // Handle task tap, e.g., show details or edit task
+//                         },
+//                         child: Card(
+//                           elevation: 5,
+//                           shape: RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.circular(12),
+//                           ),
+//                           child: Padding(
+//                             padding: const EdgeInsets.all(8.0),
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 Text(
+//                                   task['libelle'],
+//                                   style: TextStyle(
+//                                     fontWeight: FontWeight.bold,
+//                                     fontSize: 16,
+//                                     color: Colors.indigo,
+//                                   ),
+//                                 ),
+//                                 SizedBox(height: 4),
+//                                 Text(
+//                                   task['description'],
+//                                   style: TextStyle(color: Colors.black54),
+//                                   maxLines: 2,
+//                                   overflow: TextOverflow.ellipsis,
+//                                 ),
+//                                 SizedBox(height: 8),
+//                                 Text(
+//                                   'Chef: ${task['chefChantier']}',
+//                                   style: TextStyle(color: Colors.black87),
+//                                 ),
+//                                 SizedBox(height: 4),
+//                                 Text(
+//                                   'Début: ${task['dateDebut']}',
+//                                   style: TextStyle(color: Colors.black87),
+//                                 ),
+//                                 Spacer(),
+//                                 Align(
+//                                   alignment: Alignment.bottomRight,
+//                                   child: IconButton(
+//                                     icon: Icon(Icons.delete,
+//                                         color: Colors.redAccent),
+//                                     onPressed: () => _confirmDeleteTask(
+//                                         context, task['_id']),
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                       );
+//                     },
+//                   ),
+//                 ),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () {
+//           // Navigate to AddChantierForm or show dialog to add new task
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(builder: (context) => AddChantierForm()),
+//           ).then((value) {
+//             if (value == true) {
+//               _fetchTasks(); // Refresh the tasks list after adding a new one
+//             }
+//           });
+//         },
+//         child: Icon(Icons.add),
+//         backgroundColor: Colors.green,
+//       ),
+//     );
+//   }
+// }
+  void showCustomMenu(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+     builder: (context) => Align(
+           alignment: Alignment.centerLeft, // Aligns the menu to the left
+            child: FractionallySizedBox(
+            widthFactor: 0.75,
+    // builder: (context) => 
+    // FractionallySizedBox(
+    //   alignment: Alignment.bottomCenter,
+    //   widthFactor: 0.5,
+     // This makes the menu take up half the screen width
+      child: Container(
+        decoration: BoxDecoration(
+          color: Color(0xFF2F3D4C),
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20.0),
+            bottomRight: Radius.circular(20.0),
+          ),
+        ),
+        child: Column(
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text("Salima LEYLA"),
+              accountEmail: Text("Administration"),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/img_ellipse_1.png'),
+              ),
+              decoration: BoxDecoration(
+                color: Color(0xFF2F3D4C),
+              ),
+              otherAccountsPictures: [
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.white),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.dashboard, color: Colors.white),
+                    title: Text('Tableau de bord', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.homePage);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.shopping_cart, color: Colors.white),
+                    title: Text('Demande d\'achat', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.appelDoffreScreen);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.check_circle, color: Colors.white),
+                    title: Text('Validation Workflow', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.validationWorkScreen);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.phone, color: Colors.white),
+                    title: Text('Appel d\'offre', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      // Handle navigation to call for tenders
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.location_on, color: Colors.white),
+                    title: Text('Terrain', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      // Handle navigation to terrain
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.map, color: Colors.white),
+                    title: Text('Suivi chantier', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.taskManagementScreen);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Divider(color: Colors.white),
+            ListTile(
+              leading: Icon(Icons.settings, color: Colors.white),
+              title: Text('Settings', style: TextStyle(color: Colors.white)),
+              tileColor: Color(0xFF2F3D4C),
+              onTap: () {
+                // Handle navigation to settings
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.account_circle, color: Colors.white),
+              title: Text('Profile', style: TextStyle(color: Colors.white)),
+              tileColor: Color(0xFF2F3D4C),
+              onTap: () {
+                // Handle navigation to profile
+              },
+            ),
+            // ListTile(
+            //   leading: Icon(Icons.logout, color: Colors.white),
+            //   title: Text('Logout', style: TextStyle(color: Colors.white)),
+            //   tileColor: Color(0xFF2F3D4C),
+            //   onTap: () {
+            //     Navigator.pushNamed(context, AppRoutes.getStartedScreen);
+            //   },
+            // ),
+          ],
+        ),
+      ),
+    ),
+    )
+  );
+}
+@override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+  final double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Column(
         children: [
-          //Your existing UI components like CustomAppBar
+          // Ajout de la nouvelle AppBar
           SizedBox(
-            height: 72.v,
-            width: MediaQuery.of(context).size.width,
+            height: 140, // Utiliser 292 pour la hauteur ou ajuster selon vos besoins
+            width: screenWidth,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
+                // Align(
+                //   alignment: Alignment.topCenter,
+                //   child: Container(
+                //     width: screenWidth,
+                //     padding: EdgeInsets.symmetric(vertical: 20),
+                //     decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.circular(20),
+                //       image: DecorationImage(
+                //         image: AssetImage('assets/images/your_image.png'), // Remplacez par votre image
+                //         fit: BoxFit.cover,
+                //       ),
+                //     ),
+                //     child: Column(
+                //       mainAxisSize: MainAxisSize.min,
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         CustomAppBar(
+                //           leadingWidth: 20,
+                //           leading: GestureDetector(
+                //             onTap: () => _openMenu(context),
+                //             child: Padding(
+                //               padding: EdgeInsets.only(left: 20),
+                //               child: Icon(
+                //                 Icons.menu,
+                //                 color: Colors.white,
+                //               ),
+                //             ),
+                //           ),
+                //           title: Container(
+                //             width: 1000,
+                //             child: Center(
+                //               child: Text(
+                //                 'Suivi chantier',
+                //                 style: TextStyle(
+                //                   color: Colors.white,
+                //                   fontSize: 30,
+                //                 ),
+                //                 overflow: TextOverflow.ellipsis,
+                //               ),
+                //             ),
+                //           ),
+                //           bottom: PreferredSize(
+                //             preferredSize: Size.fromHeight(1),
+                //             child: Container(
+                //               color: Colors.grey[800],
+                //               height: 1,
+                //             ),
+                //           ),
+                //         ),
+                //         Padding(
+                //           padding: const EdgeInsets.symmetric(vertical: 20.0),
+                //           child: Divider(
+                //             color: Colors.white,
+                //             thickness: 2.0,
+                //             height: 1.0,
+                //             indent: 20.0,
+                //             endIndent: 20.0,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                
                 Align(
                   alignment: Alignment.topCenter,
                   child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    padding: EdgeInsets.symmetric(vertical: 20.v),
+                    width: screenWidth,
+                    padding: EdgeInsets.symmetric(vertical: 20),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       image: DecorationImage(
-                        image: AssetImage(ImageConstant.imgGroup62),
+                        image: AssetImage('assets/images/your_image.png'), // Remplacez par votre image
                         fit: BoxFit.cover,
                       ),
                     ),
-                    child: CustomAppBar(
-                      leadingWidth: 35.h,
-                      leading: GestureDetector(
-                        onTap: () => _openMenu(context),
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 20.h),
-                          child: Icon(
-                            Icons.menu,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      title: Container(
-                        width: 1000.h,
-                        child: Center(
-                          child: Text(
-                            'Suivi chantier',
-                            style: TextStyle(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // CustomAppBar(
+                        //   leadingWidth: 35,
+                        //   leading: GestureDetector(
+                        //     // onTap: () => _openMenu(context),
+                        //     onTap: () => showCustomMenu(context),
+                        //     child: Padding(
+                        //       padding: EdgeInsets.only(left: 20),
+                        //       child: Icon(
+                        //         Icons.menu,
+                        //         color: Colors.white,
+                        //       ),
+                        //     ),
+                        //   ),
+                        //   title: Container(
+                        //     width: 1000,
+                        //     child: Center(
+                        //       child: Text(
+                        //         'Suivi chantier',
+                        //         style: TextStyle(
+                        //           color: Colors.white,
+                        //           fontSize: 30,
+                        //         ),
+                        //         overflow: TextOverflow.ellipsis,
+                        //       ),
+                        //     ),
+                        //   ),
+                        //   bottom: PreferredSize(
+                        //     preferredSize: Size.fromHeight(1),
+                        //     child: Container(
+                        //       color: Colors.grey[800],
+                        //       height: 1,
+                        //     ),
+                        //   ),
+                        // ),
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(vertical: 20.0),
+                        //   child: Divider(
+                        //     color: Colors.white,
+                        //     thickness: 2.0,
+                        //     height: 1.0,
+                        //     indent: 20.0,
+                        //     endIndent: 20.0,
+                        //   ),
+                        // ),
+                        CustomAppBar(
+                        leadingWidth: MediaQuery.of(context).size.width * 0.1, // Adjust leading width
+                        leading: GestureDetector(
+                          onTap: () => showCustomMenu(context),
+                          child: Padding(
+                            padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.05), // Responsive padding
+                            child: Icon(
+                              Icons.menu,
                               color: Colors.white,
-                              fontSize: 30.h,
                             ),
-                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        title: Container(
+                          width: MediaQuery.of(context).size.width * 0.8, // Responsive title width
+                          child: Center(
+                            child: Text(
+                              'Suivi chantier',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: MediaQuery.of(context).size.width * 0.06, // Responsive font size
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        bottom: PreferredSize(
+                          preferredSize: Size.fromHeight(1),
+                          child: Container(
+                            color: Colors.grey[800],
+                            height: 1,
                           ),
                         ),
                       ),
-                      bottom: PreferredSize(
-                        preferredSize: Size.fromHeight(1.h),
-                        child: Container(
-                          color: Colors.grey[800],
-                          height: 1.h,
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.02), // Responsive padding
+                        child: Divider(
+                          color: Colors.white,
+                          thickness: MediaQuery.of(context).size.height * 0.003, // Responsive thickness
+                          height: MediaQuery.of(context).size.height * 0.01, // Responsive height
+                          indent: MediaQuery.of(context).size.width * 0.05, // Responsive indent
+                          endIndent: MediaQuery.of(context).size.width * 0.05, // Responsive endIndent
                         ),
                       ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          Divider(
-            color: Colors.white,
-            thickness: 2.0,
-            height: 1.0,
-            indent: 20.0,
-            endIndent: 20.0,
-          ),
-          Padding(
-            // padding: const EdgeInsets.all(50.0),
-            padding: const EdgeInsets.all(10.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+          // Corps de la page
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => AddChantierForm()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 12.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      elevation: 5,
-                      textStyle: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    child: Text('Ajouter un chantier'),
+                  Text(
+                    'Glisser la grid Pour Supprimé \n le suivi du chantier',
+                    // style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 20 ,color: const Color.fromARGB(255, 247, 247, 247)),
+                    textAlign: TextAlign.center,
                   ),
-                  // SizedBox(width: 50.0),
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     // Button action
-                  //   },
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: Colors.green,
-                  //     foregroundColor: Colors.white,
-                  //     padding: EdgeInsets.symmetric(
-                  //         horizontal: 24.0, vertical: 12.0),
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(12.0),
-                  //     ),
-                  //     elevation: 5,
-                  //     textStyle: TextStyle(
-                  //       fontSize: 16.0,
-                  //       fontWeight: FontWeight.bold,
-                  //     ),
-                  //   ),
-                  //   child: Text('Affecter des personnel'),
-                  // ),
-                  // SizedBox(width: 50.0),
-                  SizedBox(width: 40.0),
-                  Padding(padding: 
-                  EdgeInsets.only(top: 30.0, bottom: 20.0)),
-                  ElevatedButton(
-                    onPressed: () => _showAttendanceAgenda(context),
-                    child: Row(
-                      children: [
-                        Icon(Icons.calendar_today, color: Color.fromARGB(255, 255, 255, 255)),
-                        SizedBox(width: 6),
-                        
-                        Text(
-                          'Agenda des présences',
-                          style:TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      ), // Couleur du texte
+                  SizedBox(height: 16),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                        ),
                       ],
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white, // Définit la couleur du texte et des icônes
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    // child: TextField(
+                    //   decoration: InputDecoration(
+                    //     icon: Icon(Icons.search, color: Color(0xFFD0B3A2)),
+                    //     suffixIcon: Icon(Icons.filter_alt_outlined, color: Color(0xFFD0B3A2)),
+                    //     hintText: 'Recherche Par Mot Clé',
+                    //     border: InputBorder.none,
+                    //   ),
+                    // ),
+                    child: TextField(
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.search, color: Color(0xFFD0B3A2)),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.filter_alt_outlined, color: Color(0xFFD0B3A2)),
+                          SizedBox(width: 8), // Add space between icons if needed
+                          IconButton(
+                            icon: Icon(Icons.add, color: Color(0xFFD0B3A2)),
+                            onPressed: () {
+                              // Navigate to AddChantierForm or show dialog to add new task
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => AddChantierForm()),
+                              ).then((value) {
+                                if (value == true) {
+                                  _fetchTasks(); // Refresh the tasks list after adding a new one
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      hintText: 'Recherche Par Mot Clé',
+                      border: InputBorder.none,
+                    ),
+                     style: TextStyle(color: Colors.black),
+                  ),
+
+                  ),
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 10, // Nombre d'éléments dans la liste
+                      itemBuilder: (context, index) {
+                        return Dismissible(
+                          key: Key(index.toString()),
+                          background: Container(color: Colors.green),
+                          // secondaryBackground: Container(color: Colors.red),
+                          onDismissed: (direction) {
+                            // Action sur swipe
+                            if (direction == DismissDirection.startToEnd) {
+                              // Refuser
+
+                            } else {
+                              // Valider
+                            }
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            margin: EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              title: Text('Numéro : FA-111'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Montant : 10000,0000'),
+                                  Text('Responsable Sur La Validation: Yassine'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                //   SizedBox(width: 10.0),
-                //   ElevatedButton(
-                //   onPressed: () => _showAttendanceAgenda(context),
-                //   child: Row(
-                //     children: [
-                //       Icon(Icons.calendar_today, color: Color.fromARGB(255, 255, 255, 255)),
-                //       SizedBox(width: 4),
-                //       Text('Agenda des présences'),
-                //     ],
-                //   ),
-                //   style: ElevatedButton.styleFrom(
-                //     backgroundColor: Colors.orange,
-                //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                //   ),
-                // ),
-
-          //         SizedBox(width: 10.0),
-          //         ElevatedButton(
-          //           onPressed: () {
-          //             // Button action
-          //           },
-          //           style: ElevatedButton.styleFrom(
-          //             backgroundColor: Colors.orange,
-          //             foregroundColor: Colors.white,
-          //             padding: EdgeInsets.symmetric(
-          //                 horizontal: 24.0, vertical: 12.0),
-          //             shape: RoundedRectangleBorder(
-          //               borderRadius: BorderRadius.circular(12.0),
-          //             ),
-          //             elevation: 5,
-          //             textStyle: TextStyle(
-          //               fontSize: 16.0,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //           ),
-          //           child: Text('Agenda des présences'),
-          //         ),
-           ],
-          ),
-           ),
-          ),
-          Expanded(
-            child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : errorMessage != null
-                    ? Center(child: Text(errorMessage!))
-                    : SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                            columns: [
-                              DataColumn(label: Text('Libellé')),
-                              DataColumn(label: Text('Description')),
-                              DataColumn(label: Text('Date Début')),
-                              DataColumn(label: Text('Date Fin Prev.')),
-                              DataColumn(label: Text('Chef Chantier')),
-                              DataColumn(label: Text('Actions')),
-                            ],
-                            rows: tasks.map((task) {
-                              return DataRow(cells: [
-                                DataCell(Text(task['libelle'] ?? '')),
-                                DataCell(Text(task['description'] ?? '')),
-                                DataCell(Text(task['dateDebut'] ?? '')),
-                                DataCell(Text(task['dateFinPrev'] ?? '')),
-                                DataCell(Text(task['chefChantier'] ?? '')),
-                                DataCell(Row(
-                                  children: [
-                                    TextButton(
-                                      onPressed: () {
-                                        // Delete task action
-                                        //_deleteTask(task['_id']);
-                                        _confirmDeleteTask(context, task['_id']);
-                                      },
-                                      child: Text('Supprimer',
-                                          style: TextStyle(color: Colors.blue)),
-                                    ),
-                                    // TextButton(
-                                    //   onPressed: () {
-                                    //     // Add attendance action
-
-                                    //   },
-                                    //   child: Text('Ajouter les présences',
-                                    //       style: TextStyle(color: Colors.blue)),
-                                    // ),
-                                    TextButton(
-                                      onPressed: () {
-                                        // Attendance agenda action
-                                        _showAttendanceAgenda(context);
-                                      },
-                                      child: Text('Agenda des présences',
-                                          style: TextStyle(color: Colors.blue)),
-                                    ),
-                                  ],
-                                )),
-                              ]);
-                            }).toList(),
-                          ),
-                        ),
-                      ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
-    );
-  }
-
-   void _openMenu(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.menuScreen);
-  }
-}
+    //    floatingActionButton: FloatingActionButton(
+    //   onPressed: () {
+    //     // Navigate to AddChantierForm or show dialog to add new task
+    //     Navigator.push(
+    //       context,
+    //       MaterialPageRoute(builder: (context) => AddChantierForm()),
+    //     ).then((value) {
+    //       if (value == true) {
+    //         _fetchTasks(); // Refresh the tasks list after adding a new one
+    //       }
+    //     });
+    //   },
+    //   child: Icon(Icons.add),
+    //   backgroundColor: Colors.green,
+    // ),
+    // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat
+      );
+      }
+       void _openMenu(BuildContext context) {
+        Navigator.pushNamed(context, AppRoutes.menuScreen);
+        }
+        
+      }
+      

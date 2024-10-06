@@ -6978,9 +6978,137 @@ class _AppelDoffreScreenState extends State<AppelDoffreScreen> {
     // Load the requests on startup
     fetchDemandes();
   }
-
+void showCustomMenu(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+     builder: (context) => Align(
+           alignment: Alignment.centerLeft, // Aligns the menu to the left
+            child: FractionallySizedBox(
+            widthFactor: 0.75,
+    // builder: (context) => 
+    // FractionallySizedBox(
+    //   alignment: Alignment.bottomCenter,
+    //   widthFactor: 0.5,
+     // This makes the menu take up half the screen width
+      child: Container(
+        decoration: BoxDecoration(
+          color: Color(0xFF2F3D4C),
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20.0),
+            bottomRight: Radius.circular(20.0),
+          ),
+        ),
+        child: Column(
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text("Salima LEYLA"),
+              accountEmail: Text("Administration"),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/img_ellipse_1.png'),
+              ),
+              decoration: BoxDecoration(
+                color: Color(0xFF2F3D4C),
+              ),
+              otherAccountsPictures: [
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.white),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.dashboard, color: Colors.white),
+                    title: Text('Tableau de bord', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.homePage);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.shopping_cart, color: Colors.white),
+                    title: Text('Demande d\'achat', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.appelDoffreScreen);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.check_circle, color: Colors.white),
+                    title: Text('Validation Workflow', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.validationWorkScreen);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.phone, color: Colors.white),
+                    title: Text('Appel d\'offre', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      // Handle navigation to call for tenders
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.location_on, color: Colors.white),
+                    title: Text('Terrain', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      // Handle navigation to terrain
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.map, color: Colors.white),
+                    title: Text('Suivi chantier', style: TextStyle(color: Colors.white)),
+                    tileColor: Color(0xFF2F3D4C),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.taskManagementScreen);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Divider(color: Colors.white),
+            ListTile(
+              leading: Icon(Icons.settings, color: Colors.white),
+              title: Text('Settings', style: TextStyle(color: Colors.white)),
+              tileColor: Color(0xFF2F3D4C),
+              onTap: () {
+                // Handle navigation to settings
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.account_circle, color: Colors.white),
+              title: Text('Profile', style: TextStyle(color: Colors.white)),
+              tileColor: Color(0xFF2F3D4C),
+              onTap: () {
+                // Handle navigation to profile
+              },
+            ),
+            // ListTile(
+            //   leading: Icon(Icons.logout, color: Colors.white),
+            //   title: Text('Logout', style: TextStyle(color: Colors.white)),
+            //   tileColor: Color(0xFF2F3D4C),
+            //   onTap: () {
+            //     Navigator.pushNamed(context, AppRoutes.getStartedScreen);
+            //   },
+            // ),
+          ],
+        ),
+      ),
+    ),
+    )
+  );
+}
   Future<List<Map<String, dynamic>>> fetchDemandes() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/api/demandes'));
+    final response = await http.get(Uri.parse('Api/DetailsDemandeAchat?token=&idDa='));
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -7151,7 +7279,8 @@ class _AppelDoffreScreenState extends State<AppelDoffreScreen> {
                   CustomAppBar(
                     leadingWidth: 35.h,
                     leading: GestureDetector(
-                        onTap: () => _openMenu(context),
+                        // onTap: () => _openMenu(context),
+                        onTap: () => showCustomMenu(context),
                         child: Padding(
                         padding: EdgeInsets.only(left: 20.h),
                         child: Icon(
@@ -7290,22 +7419,22 @@ class _AppelDoffreScreenState extends State<AppelDoffreScreen> {
               ),
             ),
           ),
-          SizedBox(width: 4),
-          Container(
-            height: 36,
-            width: 60,
-              decoration: AppDecoration.fillGray400.copyWith(
-              borderRadius: BorderRadius.circular(5.h),
-            ),
-            child: Center(
-              child: CustomImageView(
-                onTap:() => _createDemande(context),
-                imagePath: ImageConstant.imgFilter,
-                height: 18.h,
-                width: 18.h,
-            ),
-          ),
-          ),
+          // SizedBox(width: 4),
+          // Container(
+          //   height: 36,
+          //   width: 60,
+          //     decoration: AppDecoration.fillGray400.copyWith(
+          //     borderRadius: BorderRadius.circular(5.h),
+          //   ),
+          //   child: Center(
+          //     child: CustomImageView(
+          //       onTap:() => _createDemande(context),
+          //       imagePath: ImageConstant.imgFilter,
+          //       height: 18.h,
+          //       width: 18.h,
+          //   ),
+          // ),
+          
         ],
       ),
     );
